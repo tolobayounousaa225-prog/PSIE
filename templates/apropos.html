@@ -1,10 +1,43 @@
 {% extends "base.html" %}
-{% block title %}{{ t.about_title }}{% endblock %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
 {% block content %}
-<h1>{{ t.about_title }}</h1>
-<section class="card"><p>{{ t.intro }}</p></section>
-<section class="card"><h2>{{ t.missions_title }}</h2><ul>{% for m in t.missions %}<li>{{ m }}</li>{% endfor %}</ul></section>
-<section class="card"><h2>{{ t.principles_title }}</h2><p>{{ t.principles }}</p></section>
-<section class="card"><h2>{{ t.organs_title }}</h2><p>{{ t.organs }}</p></section>
-<section class="card"><h2>{{ t.contact_title }}</h2><p>{{ t.address }}</p><p>{{ t.phones }}</p></section>
+{{ page_hero(t.about_title, t.about_lead, t.nav_about) }}
+<section class="section">
+  <div class="wrap grid cols-2">
+    <div data-reveal="left">
+      <span class="eyebrow">{{ t.story_title }}</span>
+      <h2>{{ t.story_title }}</h2>
+      {% for para in t.story %}<p>{{ para }}</p>{% endfor %}
+    </div>
+    <article class="card tilt" data-reveal="right">
+      <div class="ico gold">{{ icon('flag') }}</div>
+      <h3>{{ t.object_title }}</h3><p>{{ t.object }}</p>
+    </article>
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.context_title, '') }}
+    <div class="grid cols-3" data-stagger>
+      {% set icons = ['scale', 'book', 'shield'] %}
+      {% for c in t.context %}<article class="card" data-reveal><div class="ico">{{ icon(icons[loop.index0]) }}</div><p>{{ c }}</p></article>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap">
+    {{ section_head('', t.missions_title, t.missions_sub) }}
+    <div class="grid cols-3" data-stagger>
+      {% for m in t.missions %}<article class="card tilt" data-reveal><span class="n" aria-hidden="true">{{ loop.index }}</span><h3>{{ m.t }}</h3><p>{{ m.d }}</p></article>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.principles_title, '') }}
+    <div class="marquee" data-reveal><div class="marquee-track">
+      {% for rep in range(2) %}{% for p in t.principles %}<span class="chip"{% if rep == 1 %} aria-hidden="true"{% endif %}>{{ icon('check') }}{{ p }}</span>{% endfor %}{% endfor %}
+    </div></div>
+  </div>
+</section>
 {% endblock %}

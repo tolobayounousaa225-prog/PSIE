@@ -1,0 +1,80 @@
+<svg class="hero-art" viewBox="0 0 520 440" role="img" aria-label="{{ site_name }}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="46%" r="55%"><stop offset="0" stop-color="#ffe9a8" stop-opacity=".55"/><stop offset=".55" stop-color="#ffd36b" stop-opacity=".12"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
+    <linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3cf"/><stop offset="1" stop-color="#d9b25a"/></linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset="1" stop-color="#cfe8da" stop-opacity=".92"/></linearGradient>
+    <linearGradient id="wall2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8f4ee"/><stop offset="1" stop-color="#9fcdb5"/></linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f5a3a"/><stop offset="1" stop-color="#083a26"/></linearGradient>
+  </defs>
+
+  <circle class="art-glow" cx="260" cy="200" r="210" fill="url(#glow)"/>
+  <!-- anneau décoratif : étoile à huit branches qui tourne lentement -->
+  <g class="art-ring" transform="translate(260 190)">
+    <circle r="168" fill="none" stroke="#fff" stroke-opacity=".18" stroke-dasharray="2 7"/>
+    <g fill="none" stroke="#ffe3a0" stroke-opacity=".5" stroke-width="1.400">
+      <rect x="-120" y="-120" width="240" height="240"/>
+      <rect x="-120" y="-120" width="240" height="240" transform="rotate(45)"/>
+    </g>
+  </g>
+
+  <!-- étoiles scintillantes -->
+  <g class="stars" fill="#fff6d6">
+    <path class="tw" d="M70 70l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
+    <path class="tw" d="M440 56l3 8 8 3-8 3-3 8-3-8-8-3 8-3z"/>
+    <path class="tw" d="M470 190l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>
+    <path class="tw" d="M36 210l2.500 6 6 2.500-6 2.500-2.500 6-2.500-6-6-2.500 6-2.500z"/>
+    <path class="tw" d="M360 24l2.500 6 6 2.500-6 2.500-2.500 6-2.500-6-6-2.500 6-2.500z"/>
+    <circle class="tw" cx="150" cy="40" r="2.500"/><circle class="tw" cx="405" cy="130" r="2"/><circle class="tw" cx="95" cy="150" r="2"/>
+  </g>
+
+  <!-- livre ouvert qui flotte -->
+  <g class="art-float" transform="translate(52 286)">
+    <path d="M0 14c18-8 36-8 54 0v-34c-18-8-36-8-54 0z" fill="#fff" fill-opacity=".92"/>
+    <path d="M54 14c18-8 36-8 54 0v-34c-18-8-36-8-54 0z" fill="#e6f3ec"/>
+    <path d="M54 -20V14" stroke="#c9a24b" stroke-width="2"/>
+    <path d="M10-8h34 M10 0h30 M64-8h34 M64 0h28" stroke="#0f5a3a" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- mosquée -->
+  <g class="mosque">
+    <!-- minarets -->
+    <g>
+      <rect x="92" y="170" width="26" height="170" fill="url(#wall2)"/>
+      <rect x="88" y="196" width="34" height="8" rx="3" fill="#d9b25a"/>
+      <path d="M92 170c0-20 13-30 13-48 0 18 13 28 13 48z" fill="url(#dome)"/>
+      <path d="M105 106v16" stroke="#d9b25a" stroke-width="2"/>
+      <path class="crescent" d="M105 88a8 8 0 1 0 6 13 6.500 6.500 0 1 1-6-13z" fill="#ffe9a8"/>
+      <path d="M99 232h12v26H99z" fill="#0f5a3a" fill-opacity=".35" rx="6"/>
+    </g>
+    <g>
+      <rect x="402" y="170" width="26" height="170" fill="url(#wall2)"/>
+      <rect x="398" y="196" width="34" height="8" rx="3" fill="#d9b25a"/>
+      <path d="M402 170c0-20 13-30 13-48 0 18 13 28 13 48z" fill="url(#dome)"/>
+      <path d="M415 106v16" stroke="#d9b25a" stroke-width="2"/>
+      <path class="crescent" d="M415 88a8 8 0 1 0 6 13 6.500 6.500 0 1 1-6-13z" fill="#ffe9a8"/>
+      <path d="M409 232h12v26h-12z" fill="#0f5a3a" fill-opacity=".35"/>
+    </g>
+    <!-- salle principale -->
+    <rect x="140" y="236" width="240" height="104" fill="url(#wall)"/>
+    <path d="M140 236h240" stroke="#d9b25a" stroke-width="4"/>
+    <!-- petites coupoles -->
+    <path d="M148 236a30 30 0 0 1 60 0z" fill="url(#dome)"/>
+    <path d="M312 236a30 30 0 0 1 60 0z" fill="url(#dome)"/>
+    <!-- grande coupole -->
+    <path d="M190 236a70 70 0 0 1 140 0z" fill="url(#dome)"/>
+    <path d="M260 166v-22" stroke="#d9b25a" stroke-width="3"/>
+    <path class="crescent" d="M260 118a13 13 0 1 0 10 21 10.500 10.500 0 1 1-10-21z" fill="#ffe9a8"/>
+    <!-- arcades -->
+    <g fill="#0f5a3a" fill-opacity=".78">
+      <path d="M162 340v-48a14 14 0 0 1 28 0v48z"/><path d="M204 340v-48a14 14 0 0 1 28 0v48z"/>
+      <path d="M288 340v-48a14 14 0 0 1 28 0v48z"/><path d="M330 340v-48a14 14 0 0 1 28 0v48z"/>
+    </g>
+    <path d="M240 340v-68a20 20 0 0 1 40 0v68z" fill="#083a26"/>
+    <path d="M250 340v-60a10 10 0 0 1 20 0v60z" fill="#ffe9a8" fill-opacity=".85" class="door-light"/>
+  </g>
+
+  <!-- sol -->
+  <path d="M0 340h520v100H0z" fill="url(#ground)"/>
+  <path d="M0 340c60-10 120-10 180 0s120 10 180 0 120-10 160 0" fill="none" stroke="#ffe3a0" stroke-opacity=".35" stroke-width="2"/>
+  <g fill="#fff" fill-opacity=".1"><rect x="60" y="372" width="120" height="6" rx="3"/><rect x="340" y="392" width="140" height="6" rx="3"/><rect x="190" y="410" width="110" height="6" rx="3"/></g>
+</svg>

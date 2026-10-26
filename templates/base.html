@@ -3,34 +3,77 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}{{ site_name }}{% endblock %} — PSIE</title>
-  <meta name="description" content="{{ t.tagline }}">
+  <title>{% if page == 'index' %}{{ site_name }} — PSIE{% else %}{% block title %}{{ t[nav_key] }}{% endblock %} — PSIE{% endif %}</title>
+  <meta name="description" content="{{ description }}">
+  <meta name="theme-color" content="#0a3a27">
+  {% if noindex %}<meta name="robots" content="noindex">{% endif %}
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src {{ api_base or "'none'" }}; base-uri 'none'; form-action 'none'; object-src 'none'">
+  {% if canonical %}
+  <link rel="canonical" href="{{ canonical }}">
+  {% for code, href in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ href }}">{% endfor %}
+  <meta property="og:type" content="website"><meta property="og:site_name" content="PSIE">
+  <meta property="og:title" content="{{ site_name }}"><meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="{{ canonical }}"><meta property="og:locale" content="{{ 'ar_AR' if lang == 'ar' else 'fr_FR' }}">
+  <meta name="twitter:card" content="summary">
+  {% endif %}
+  <link rel="icon" href="{{ root }}assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="{{ root }}assets/site.css">
   <script src="{{ root }}assets/site.js" defer></script>
+  {% if page == 'index' and site_url %}
+  <script type="application/ld+json">{{ jsonld | safe }}</script>
+  {% endif %}
 </head>
 <body data-api="{{ api_base }}" data-lang="{{ lang }}" data-page="{{ page }}">
+{% include "_icons.html" %}
 <a class="skip" href="#contenu">{{ t.skip }}</a>
+<div class="progress" aria-hidden="true"></div>
 <header class="topbar">
-  <a class="brand" href="index.html">
-    {% if logo %}<img class="logo" src="{{ root }}assets/{{ logo }}" alt="PSIE" height="36">{% else %}<span class="brand-mark">PSIE</span>{% endif %}
-    <span class="brand-text">{{ site_name }}</span>
-  </a>
-  <nav aria-label="Navigation">
-    <a href="index.html"{% if page == 'index' %} aria-current="page"{% endif %}>{{ t.nav_home }}</a>
-    <a href="apropos.html"{% if page == 'apropos' %} aria-current="page"{% endif %}>{{ t.nav_about }}</a>
-    <a href="membres.html"{% if page == 'membres' %} aria-current="page"{% endif %}>{{ t.nav_members }}</a>
-    <a href="actualites.html"{% if page in ('actualites', 'actualite') %} aria-current="page"{% endif %}>{{ t.nav_news }}</a>
-    {% if app_url %}<a href="{{ app_url }}/adhesion">{{ t.nav_join }}</a>{% endif %}
-  </nav>
-  <div class="tools">
-    <a id="lang-switch" class="lang" href="{{ other_href }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}">{{ other_label }}</a>
-    {% if app_url %}<a class="login" href="{{ app_url }}/login">{{ t.nav_login }}</a>{% endif %}
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="PSIE">
+      {% if logo %}<img class="logo" src="{{ root }}assets/{{ logo }}" alt="PSIE" height="38">{% else %}<span class="brand-mark">PSIE</span>{% endif %}
+      <span class="brand-text">{{ site_name }}</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="{{ t.menu }}">
+      {% for file, key in nav %}<a href="{{ file }}.html"{% if page == file or (file == 'actualites' and page == 'actualite') %} aria-current="page"{% endif %}>{{ t[key] }}</a>{% endfor %}
+    </nav>
+    <div class="tools">
+      <a id="lang-switch" class="lang" href="{{ other_href }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}"><svg class="icon"><use href="#i-globe"/></svg>{{ other_label }}</a>
+      {% if app_url %}<a class="login" href="{{ app_url }}/login">{{ t.nav_login }}</a>{% endif %}
+      <button class="menu-toggle" type="button" aria-controls="nav" aria-expanded="false" aria-label="{{ t.menu }}"><svg class="icon"><use href="#i-menu"/></svg></button>
+    </div>
   </div>
 </header>
 <main id="contenu">
 {% block content %}{% endblock %}
 </main>
-<footer class="footer"><p>{{ t.footer }}</p></footer>
+<footer class="footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="brand" href="index.html" aria-label="PSIE">{% if logo %}<img class="logo" src="{{ root }}assets/{{ logo }}" alt="PSIE" height="38">{% else %}<span class="brand-mark">PSIE</span>{% endif %}<span class="brand-text">{{ site_name }}</span></a>
+        <p>{{ t.footer_tag }}</p>
+      </div>
+      <div>
+        <h3>{{ t.footer_links }}</h3>
+        <ul>
+          <li><a href="verification.html">{{ t.nav_verify }}</a></li>
+          <li><a href="faq.html">{{ t.nav_faq }}</a></li>
+          <li><a href="mentions.html">{{ t.nav_legal }}</a></li>
+          {% if app_url %}<li><a href="{{ app_url }}/adhesion/suivi">{{ t.track }}</a></li>{% endif %}
+        </ul>
+      </div>
+      <div>
+        <h3>{{ t.footer_contact }}</h3>
+        <ul>
+          <li>{{ t.address }}</li>
+          <li><a href="tel:{{ t.phone1|replace(' ', '') }}" dir="ltr">{{ t.phone1 }}</a></li>
+          <li><a href="tel:{{ t.phone2|replace(' ', '') }}" dir="ltr">{{ t.phone2 }}</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="copy">{{ t.footer }}</p>
+  </div>
+</footer>
+<button class="to-top" type="button" aria-label="{{ t.to_top }}"><svg class="icon"><use href="#i-up"/></svg></button>
 </body>
 </html>

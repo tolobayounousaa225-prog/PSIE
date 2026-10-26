@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 import build as site  # noqa: E402
+import content  # noqa: E402
 
 API = "https://app.example.org"
 
@@ -47,7 +48,7 @@ def html_files(dist):
 
 
 def test_both_languages_are_generated(dist):
-    for name in ("index", "apropos", "membres", "actualites", "actualite"):
+    for name in ("index", "apropos", "gouvernance", "membres", "adhesion", "verification", "actualites", "faq", "contact", "mentions", "actualite"):
         assert (dist / f"{name}.html").exists() and (dist / "ar" / f"{name}.html").exists()
     fr, ar = (dist / "index.html").read_text(encoding="utf-8"), (dist / "ar" / "index.html").read_text(encoding="utf-8")
     assert 'lang="fr" dir="ltr"' in fr and "Nos missions" in fr
@@ -60,6 +61,8 @@ def test_no_inline_script_style_or_event_handlers(dist):
         text = f.read_text(encoding="utf-8")
         p = parse(f)
         for tag, attrs in p.tags:
+            if tag == "script" and attrs.get("type") == "application/ld+json":
+                continue                                    # données structurées : jamais exécutées
             if tag == "script":
                 assert attrs.get("src") and not attrs.get("src").startswith("http"), f
             assert "style" not in attrs, f
@@ -106,7 +109,7 @@ def test_without_app_url_buttons_are_disabled(tmp_path, monkeypatch, capsys):
     monkeypatch.delenv("CUSTOM_DOMAIN", raising=False)
     d = site.build(tmp_path / "d")
     text = (d / "index.html").read_text(encoding="utf-8")
-    assert "/adhesion" not in text and "/login" not in text and "Bientôt disponible" in text
+    assert 'href="/adhesion' not in text and 'href="/login' not in text and "/login" not in text
     assert "connect-src 'none'" in htmllib.unescape(text) and not (d / "CNAME").exists()
     assert "API_BASE non défini" in capsys.readouterr().err
 
@@ -139,7 +142,7 @@ def test_javascript_never_builds_html_from_data():
 
 def test_arabic_phone_numbers_keep_their_digit_order(dist):
     ar = (dist / "ar" / "index.html").read_text(encoding="utf-8")
-    assert "⁦+225 07 07 83 63 73⁩" in ar
+    assert 'dir="ltr">+225 07 07 83 63 73</a>' in ar
 
 
 def test_page_titles_and_accessibility_basics(dist):
@@ -148,3 +151,35 @@ def test_page_titles_and_accessibility_basics(dist):
             continue
         text = f.read_text(encoding="utf-8")
         assert "<title>" in text and 'name="viewport"' in text and 'class="skip"' in text, f
+
+
+def test_french_and_arabic_content_have_the_same_structure():
+    def shape(v):
+        if isinstance(v, dict):
+            return {k: shape(x) for k, x in v.items()}
+        if isinstance(v, (list, tuple)):
+            return [shape(x) for x in v]
+        return type(v).__name__
+    assert shape(content.T["fr"]) == shape(content.T["ar"])
+
+
+def test_titles_are_unique_per_language(dist):
+    for base in (dist, dist / "ar"):
+        titles = []
+        for f in base.glob("*.html"):
+            if f.name in ("404.html", "actualite.html"):   # le détail partage le titre de la liste
+                continue
+            titles.append(re.search(r"<title>(.*?)</title>", f.read_text(encoding="utf-8"), re.S).group(1))
+        assert len(titles) == len(set(titles))
+
+
+def test_seo_files(tmp_path, monkeypatch):
+    monkeypatch.setenv("API_BASE", API)
+    monkeypatch.setenv("SITE_URL", "https://psie.example.org")
+    d = site.build(tmp_path / "d")
+    sitemap = (d / "sitemap.xml").read_text(encoding="utf-8")
+    assert "https://psie.example.org/gouvernance.html" in sitemap and "hreflang" in sitemap
+    assert "actualite.html" not in sitemap                  # page de détail : noindex
+    assert "Sitemap: https://psie.example.org/sitemap.xml" in (d / "robots.txt").read_text(encoding="utf-8")
+    page = (d / "index.html").read_text(encoding="utf-8")
+    assert 'rel="canonical"' in page and 'hreflang="ar"' in page and "application/ld+json" in page

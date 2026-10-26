@@ -26,6 +26,7 @@ jobs:
           API_BASE: ${{ vars.API_BASE }}
           APP_URL: ${{ vars.APP_URL }}
           CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
+          SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
         run: python build.py
       - uses: actions/upload-pages-artifact@v3
         with:

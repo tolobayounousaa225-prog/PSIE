@@ -27,6 +27,7 @@ Application ──►  Serveur Hostinger  (connexion, adhésion, suivi, QR codes
    | `API_BASE` | adresse de l'application, ex. `https://app.exemple.org` | dès que le serveur est en ligne |
    | `APP_URL` | idem (laisser vide si identique à `API_BASE`) | facultatif |
    | `CUSTOM_DOMAIN` | ex. `psie-ci.org` | quand le nom de domaine est choisi |
+   | `SITE_URL` | ex. `https://psie-ci.org` | facultatif : adresse publique (sitemap, SEO). Par défaut : l'adresse GitHub Pages |
 
    Tant qu'elles ne sont pas définies, le site se publie quand même : les boutons « Adhérer » et
    « Connexion » sont alors absents ou inactifs, et les membres/actualités affichent un message

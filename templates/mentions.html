@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.legal_title, '', t.nav_legal) }}
+<section class="section">
+  <div class="wrap grid" data-stagger>
+    {% for block in t.legal %}<article class="card" data-reveal><h3>{{ block.t }}</h3>{% for p in block.p %}<p>{{ p }}</p>{% endfor %}</article>{% endfor %}
+  </div>
+</section>
+{% endblock %}
