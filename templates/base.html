@@ -2,6 +2,7 @@
 <html lang="{{ lang }}" dir="{{ dir }}">
 <head>
   <meta charset="utf-8">
+  {% if base_href %}<base href="{{ base_href }}">{% endif %}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% if page == 'index' %}{{ site_name }} — PSIE{% else %}{% block title %}{{ t[nav_key] }}{% endblock %} — PSIE{% endif %}</title>
   <meta name="description" content="{{ description }}">
@@ -28,6 +29,7 @@
 </head>
 <body data-api="{{ api_base }}" data-lang="{{ lang }}" data-page="{{ page }}">
 {% include "_icons.html" %}
+{% from "_macros.html" import icon with context %}
 <a class="skip" href="#contenu">{{ t.skip }}</a>
 <div class="progress" aria-hidden="true"></div>
 {% if data.annonce.actif and data.annonce.texte[lang] %}
@@ -64,15 +66,24 @@
         <p>{{ t.footer_tag }}</p>
       </div>
       <div>
-        <h3>{{ t.footer_links }}</h3>
+        <h3>{{ t.footer_discover }}</h3>
         <ul>
-          <li><a href="documents.html">{{ t.nav_docs }}</a></li>
+          <li><a href="equipe.html">{{ t.nav_team }}</a></li>
+          <li><a href="partenaires.html">{{ t.nav_partners }}</a></li>
           <li><a href="regions.html">{{ t.nav_regions }}</a></li>
+          <li><a href="documents.html">{{ t.nav_docs }}</a></li>
           <li><a href="galerie.html">{{ t.nav_gallery }}</a></li>
-          <li><a href="verification.html">{{ t.nav_verify }}</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>{{ t.footer_help }}</h3>
+        <ul>
           <li><a href="faq.html">{{ t.nav_faq }}</a></li>
-          <li><a href="mentions.html">{{ t.nav_legal }}</a></li>
+          <li><a href="glossaire.html">{{ t.nav_glossary }}</a></li>
+          <li><a href="verification.html">{{ t.nav_verify }}</a></li>
           {% if app_url %}<li><a href="{{ app_url }}/adhesion/suivi">{{ t.track }}</a></li>{% endif %}
+          <li><a href="mentions.html">{{ t.nav_legal }}</a></li>
+          <li><a href="confidentialite.html">{{ t.nav_privacy }}</a></li>
         </ul>
       </div>
       <div>
@@ -82,6 +93,14 @@
           <li><a href="tel:{{ t.phone1|replace(' ', '') }}" dir="ltr">{{ t.phone1 }}</a></li>
           <li><a href="tel:{{ t.phone2|replace(' ', '') }}" dir="ltr">{{ t.phone2 }}</a></li>
         </ul>
+        {% set wa = data.contact.whatsapp_link[lang] if data.contact.whatsapp_link else '' %}
+        {% if wa or data.contact.social %}
+        <p class="follow">{{ t.follow_us }}</p>
+        <ul class="social">
+          {% if wa %}<li><a href="{{ wa }}" rel="noopener noreferrer" target="_blank" aria-label="WhatsApp">{{ icon('whatsapp') }}</a></li>{% endif %}
+          {% for k, url in data.contact.social %}<li><a href="{{ url }}" rel="noopener noreferrer" target="_blank" aria-label="{{ t.social_names[k] }}">{{ icon(k) }}</a></li>{% endfor %}
+        </ul>
+        {% endif %}
       </div>
     </div>
     <p class="copy">{{ t.footer }}</p>

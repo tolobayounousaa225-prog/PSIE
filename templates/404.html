@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block title %}{{ t.notfound_title }}{% endblock %}
+{% block content %}
+{{ page_hero(t.notfound_title, t.notfound_text, '404') }}
+<section class="section">
+  <div class="wrap notfound">
+    <p class="cta-row"><a class="btn" href="index.html">{{ t.notfound_home }}{{ icon('arrow', 'flip') }}</a></p>
+    <ul class="quick-links">
+      {% for file, key in nav if file != 'index' %}<li><a href="{{ file }}.html">{{ t[key] }}</a></li>{% endfor %}
+      <li><a href="regions.html">{{ t.nav_regions }}</a></li><li><a href="faq.html">{{ t.nav_faq }}</a></li>
+    </ul>
+    <p lang="ar" dir="rtl" class="muted">{{ t.notfound_ar }}</p>
+  </div>
+</section>
+{% endblock %}

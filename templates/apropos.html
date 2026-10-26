@@ -15,6 +15,17 @@
     </article>
   </div>
 </section>
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.timeline_title, t.timeline_lead) }}
+    <ol class="history">
+      {% for e in t.timeline %}
+      <li data-reveal="{{ 'left' if loop.index is odd else 'right' }}"><span class="dot" aria-hidden="true"></span>
+        <time>{{ e.date }}</time><h3>{{ e.t }}</h3><p>{{ e.d }}</p></li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
 {% include "_president.html" %}
 <section class="section alt">
   <div class="wrap">

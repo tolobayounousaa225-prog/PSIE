@@ -8,6 +8,7 @@
       <article class="card contact-card" data-reveal><div class="ico">{{ icon('pin') }}</div><div><h3>{{ t.address_label }}</h3><p>{{ t.address }}</p></div></article>
       <article class="card contact-card" data-reveal><div class="ico gold">{{ icon('phone') }}</div><div><h3>{{ t.phone_label }}</h3>
         <p><a href="tel:{{ t.phone1|replace(' ', '') }}" dir="ltr">{{ t.phone1 }}</a><br><a href="tel:{{ t.phone2|replace(' ', '') }}" dir="ltr">{{ t.phone2 }}</a></p></div></article>
+      {% if data.contact.whatsapp_link %}<div class="cta-row" data-reveal><a class="btn whatsapp" href="{{ data.contact.whatsapp_link[lang] }}" rel="noopener noreferrer" target="_blank">{{ icon('whatsapp') }}{{ t.whatsapp_cta }}</a></div>{% endif %}
       <p class="muted" data-reveal>{{ t.contact_note }}</p>
       <div class="cta-row" data-reveal>{% if app_url %}<a class="btn dark" href="{{ app_url }}/adhesion">{{ t.join_cta }}{{ icon('arrow', 'flip') }}</a>{% endif %}</div>
     </div>

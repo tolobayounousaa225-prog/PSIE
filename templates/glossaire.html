@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.glossary_title, t.glossary_lead, t.nav_glossary) }}
+<section class="section">
+  <div class="wrap">
+    <dl class="glossary" data-stagger>
+      {% for g in t.glossary %}
+      <div class="entry" data-reveal>
+        <dt><span class="term">{{ g.term }}</span>{% if g.full %}<span class="full">{{ g.full }}</span>{% endif %}</dt>
+        <dd>{{ g.d }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </div>
+</section>
+{% endblock %}
