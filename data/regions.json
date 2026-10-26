@@ -1,1 +1,314 @@
-[]
+[
+  {
+    "drena": "Abidjan 1",
+    "region": "Abidjan",
+    "delegue": "",
+    "telephone": "",
+    "lat": 5.36,
+    "lon": -4.01
+  },
+  {
+    "drena": "Abidjan 2",
+    "region": "Abidjan",
+    "delegue": "",
+    "telephone": "",
+    "lat": 5.36,
+    "lon": -4.01
+  },
+  {
+    "drena": "Abidjan 3",
+    "region": "Abidjan",
+    "delegue": "",
+    "telephone": "",
+    "lat": 5.36,
+    "lon": -4.01
+  },
+  {
+    "drena": "Abidjan 4",
+    "region": "Abidjan",
+    "delegue": "",
+    "telephone": "",
+    "lat": 5.36,
+    "lon": -4.01
+  },
+  {
+    "drena": "Abengourou",
+    "region": "Est",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.73,
+    "lon": -3.5
+  },
+  {
+    "drena": "Aboisso",
+    "region": "Est",
+    "delegue": "",
+    "telephone": "",
+    "lat": 5.47,
+    "lon": -3.21
+  },
+  {
+    "drena": "Adzopé",
+    "region": "Est",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.11,
+    "lon": -3.86
+  },
+  {
+    "drena": "Agboville",
+    "region": "Est",
+    "delegue": "",
+    "telephone": "",
+    "lat": 5.93,
+    "lon": -4.21
+  },
+  {
+    "drena": "Bondoukou",
+    "region": "Est",
+    "delegue": "",
+    "telephone": "",
+    "lat": 8.04,
+    "lon": -2.8
+  },
+  {
+    "drena": "Bongouanou",
+    "region": "Est",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.65,
+    "lon": -4.2
+  },
+  {
+    "drena": "Bouaké 1",
+    "region": "Centre",
+    "delegue": "",
+    "telephone": "",
+    "lat": 7.69,
+    "lon": -5.03
+  },
+  {
+    "drena": "Bouaké 2",
+    "region": "Centre",
+    "delegue": "",
+    "telephone": "",
+    "lat": 7.69,
+    "lon": -5.03
+  },
+  {
+    "drena": "Dimbokro",
+    "region": "Centre",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.65,
+    "lon": -4.71
+  },
+  {
+    "drena": "Yamoussoukro",
+    "region": "Centre",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.82,
+    "lon": -5.28
+  },
+  {
+    "drena": "Tiébissou",
+    "region": "Centre",
+    "delegue": "",
+    "telephone": "",
+    "lat": 7.16,
+    "lon": -5.23
+  },
+  {
+    "drena": "Korhogo 1",
+    "region": "Nord",
+    "delegue": "",
+    "telephone": "",
+    "lat": 9.46,
+    "lon": -5.63
+  },
+  {
+    "drena": "Korhogo 2",
+    "region": "Nord",
+    "delegue": "",
+    "telephone": "",
+    "lat": 9.46,
+    "lon": -5.63
+  },
+  {
+    "drena": "Boundiali",
+    "region": "Nord",
+    "delegue": "",
+    "telephone": "",
+    "lat": 9.52,
+    "lon": -6.49
+  },
+  {
+    "drena": "Ferkessédougou",
+    "region": "Nord",
+    "delegue": "",
+    "telephone": "",
+    "lat": 9.59,
+    "lon": -5.2
+  },
+  {
+    "drena": "Tingréla",
+    "region": "Nord",
+    "delegue": "",
+    "telephone": "",
+    "lat": 10.49,
+    "lon": -6.41
+  },
+  {
+    "drena": "Odienné",
+    "region": "Nord",
+    "delegue": "",
+    "telephone": "",
+    "lat": 9.51,
+    "lon": -7.56
+  },
+  {
+    "drena": "Man",
+    "region": "Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 7.41,
+    "lon": -7.55
+  },
+  {
+    "drena": "Danané",
+    "region": "Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 7.26,
+    "lon": -8.15
+  },
+  {
+    "drena": "Guiglo",
+    "region": "Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.54,
+    "lon": -7.49
+  },
+  {
+    "drena": "Duékoué",
+    "region": "Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.74,
+    "lon": -7.35
+  },
+  {
+    "drena": "Bangolo",
+    "region": "Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 7.01,
+    "lon": -7.49
+  },
+  {
+    "drena": "San Pedro",
+    "region": "Sud-Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 4.75,
+    "lon": -6.64
+  },
+  {
+    "drena": "Soubré",
+    "region": "Sud-Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 5.79,
+    "lon": -6.59
+  },
+  {
+    "drena": "Sassandra",
+    "region": "Sud-Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 4.95,
+    "lon": -6.09
+  },
+  {
+    "drena": "Daloa",
+    "region": "Centre-Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.88,
+    "lon": -6.45
+  },
+  {
+    "drena": "Issia",
+    "region": "Centre-Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.49,
+    "lon": -6.59
+  },
+  {
+    "drena": "Vavoua",
+    "region": "Centre-Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 7.38,
+    "lon": -6.48
+  },
+  {
+    "drena": "Bouaflé",
+    "region": "Centre-Ouest",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.99,
+    "lon": -5.74
+  },
+  {
+    "drena": "Séguéla",
+    "region": "",
+    "delegue": "",
+    "telephone": "",
+    "lat": 7.96,
+    "lon": -6.67
+  },
+  {
+    "drena": "Mankono",
+    "region": "",
+    "delegue": "",
+    "telephone": "",
+    "lat": 8.06,
+    "lon": -6.19
+  },
+  {
+    "drena": "Katiola",
+    "region": "",
+    "delegue": "",
+    "telephone": "",
+    "lat": 8.14,
+    "lon": -5.1
+  },
+  {
+    "drena": "Bouna",
+    "region": "",
+    "delegue": "",
+    "telephone": "",
+    "lat": 9.27,
+    "lon": -2.99
+  },
+  {
+    "drena": "Gagnoa",
+    "region": "",
+    "delegue": "",
+    "telephone": "",
+    "lat": 6.13,
+    "lon": -5.95
+  },
+  {
+    "drena": "Lakota",
+    "region": "",
+    "delegue": "",
+    "telephone": "",
+    "lat": 5.85,
+    "lon": -5.68
+  }
+]
