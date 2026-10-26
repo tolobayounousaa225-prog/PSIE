@@ -171,8 +171,9 @@
   function renderNewsList(data) {
     var box = document.getElementById("actualites-list");
     if (!box) return;
-    clear(box);
-    if (!data.actualites.length) { box.appendChild(el("p", "muted", LABELS.none)); return; }
+    var fromSite = !!box.dataset.static;            // actualités déjà publiées dans le site : celles du serveur s'y ajoutent
+    if (!fromSite) clear(box); else box.querySelectorAll(".skeleton").forEach(function (n) { n.remove(); });
+    if (!data.actualites.length) { if (!fromSite) box.appendChild(el("p", "muted", LABELS.none)); return; }
     data.actualites.forEach(function (n) { box.appendChild(newsCard(n, false)); });
   }
 
@@ -180,6 +181,7 @@
     var section = document.getElementById("home-news-section");
     var box = document.getElementById("home-news");
     if (!box) return;
+    if (box.dataset.static) return;                 // les actualités du site ont la priorité sur l'accueil
     if (!data.actualites.length) { if (section) section.hidden = true; return; }
     clear(box);
     data.actualites.slice(0, 3).forEach(function (n, i) {
@@ -421,7 +423,9 @@
 
   function fail() {
     document.querySelectorAll(".js-loading, .skeleton").forEach(function (n) { n.remove(); });
-    if (page === "index") { var s = document.getElementById("home-news-section"); if (s) s.hidden = true; return; }
+    var published = document.querySelector("[data-static]");   // des actualités du site restent affichées
+    if (page === "index") { var s = document.getElementById("home-news-section"); if (s && !published) s.hidden = true; return; }
+    if (page === "actualites" && published) return;
     var note = document.getElementById("members-note");
     if (page === "membres" && note) { note.hidden = false; return; }   // la liste des fondateurs reste affichée
     var f = document.getElementById("fallback");

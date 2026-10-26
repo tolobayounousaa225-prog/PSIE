@@ -79,6 +79,17 @@ def bi(where: str, value) -> dict:
     return {"fr": str(value.get("fr", "") or ""), "ar": str(value.get("ar", "") or "")}
 
 
+MONTHS = {
+    "fr": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+    "ar": ["يناير", "فبراير", "مارس", "أبريل", "ماي", "يونيو", "يوليوز", "غشت", "شتنبر", "أكتوبر", "نونبر", "دجنبر"],
+}
+
+
+def long_date(iso: str, lang: str) -> str:
+    y, m, d = (int(x) for x in iso.split("-"))
+    return f"{d}{'er' if d == 1 and lang == 'fr' else ''} {MONTHS[lang][m - 1]} {y}"
+
+
 def load_site_data() -> dict:
     carte = read_data("_carte", {})
     lon0, lat1, k, S = carte["lon0"], carte["lat1"], carte["k"], carte["S"]
@@ -88,8 +99,10 @@ def load_site_data() -> dict:
 
     annonce = read_data("annonce", {})
     president = read_data("president", {})
-    documents, galerie, regions, faitieres = (read_data(n, []) for n in ("documents", "galerie", "regions", "faitieres"))
-    for name, value in (("documents", documents), ("galerie", galerie), ("regions", regions), ("faitieres", faitieres)):
+    documents, galerie, regions, faitieres, actualites = (
+        read_data(n, []) for n in ("documents", "galerie", "regions", "faitieres", "actualites"))
+    for name, value in (("documents", documents), ("galerie", galerie), ("regions", regions), ("faitieres", faitieres),
+                        ("actualites", actualites)):
         if not isinstance(value, list):
             sys.exit(f"data/{name}.json : une liste [ ... ] est attendue.")
 
@@ -100,8 +113,22 @@ def load_site_data() -> dict:
         "president": {"nom": str(president.get("nom", "")).strip(), "fonction": bi("president.fonction", president.get("fonction", "")),
                       "photo": asset_path("data/president.json (photo)", president.get("photo")),
                       "message": bi("president.message", president.get("message", ""))},
-        "documents": [], "galerie": [], "regions": [], "faitieres": [],
+        "documents": [], "galerie": [], "regions": [], "faitieres": [], "actualites": [],
     }
+    seen_news = set()
+    for i, n in enumerate(actualites, 1):
+        slug, date = str(n.get("slug", "")).strip(), str(n.get("date", "")).strip()
+        if not re.fullmatch(r"[a-z0-9-]{2,60}", slug) or slug in seen_news:
+            sys.exit(f"data/actualites.json [{i}] : « slug » invalide ou en double (lettres minuscules, chiffres et tirets).")
+        if not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])", date):
+            sys.exit(f"data/actualites.json [{i}] : « date » invalide « {date} » (format attendu : AAAA-MM-JJ, ex. 2026-12-15).")
+        seen_news.add(slug)
+        out["actualites"].append({
+            "slug": slug, "date": date, "date_long": {l: long_date(date, l) for l in ("fr", "ar")},
+            "titre": bi(f"actualites[{i}].titre", n.get("titre", "")), "resume": bi(f"actualites[{i}].resume", n.get("resume", "")),
+            "contenu": bi(f"actualites[{i}].contenu", n.get("contenu", "")),
+            "image": asset_path(f"data/actualites.json [{i}] (image)", n.get("image"))})
+    out["actualites"].sort(key=lambda n: n["date"], reverse=True)
     for i, d in enumerate(documents, 1):
         out["documents"].append({"titre": bi(f"documents[{i}].titre", d.get("titre", "")), "description": bi(f"documents[{i}].description", d.get("description", "")),
                                  "fichier": asset_path(f"data/documents.json [{i}]", d.get("fichier")), "categorie": str(d.get("categorie", ""))})
@@ -158,7 +185,8 @@ def build(dist: Path | None = None) -> Path:
         sys.exit(f"GOATCOUNTER invalide : « {counter} » (attendu : le code de votre compte, ex. psie).")
     dist = dist or Path(os.environ.get("DIST", ROOT / "dist"))
     site_data = load_site_data()
-    pages = list(PAGES) + [(f"faitiere-{f['slug']}", "nav_members", True) for f in site_data["faitieres"]]
+    pages = (list(PAGES) + [(f"faitiere-{f['slug']}", "nav_members", True) for f in site_data["faitieres"]]
+             + [(f"actualite-{n['slug']}", "nav_news", True) for n in site_data["actualites"]])
     csp = ("default-src 'self'; script-src 'self'" + (" https://gc.zgo.at" if counter else "") + "; style-src 'self'; "
            "img-src 'self' data:" + (f" https://{counter}.goatcounter.com" if counter else "") + "; "
            f"connect-src {api_base or chr(39) + 'none' + chr(39)}" + (f" https://{counter}.goatcounter.com" if counter else "") +
@@ -188,8 +216,9 @@ def build(dist: Path | None = None) -> Path:
                 "telephone": [t["phone1"], t["phone2"]],
             }, ensure_ascii=False).replace("</", "<\\/") if site_url else ""
             fa = next((f for f in site_data["faitieres"] if page == f"faitiere-{f['slug']}"), None)
-            html = env.get_template("faitiere.html" if fa else f"{page}.html").render(
-                data=site_data, fa=fa, csp=csp, counter=counter,
+            ne = next((n for n in site_data["actualites"] if page == f"actualite-{n['slug']}"), None)
+            html = env.get_template("faitiere.html" if fa else "actualite_article.html" if ne else f"{page}.html").render(
+                data=site_data, fa=fa, ne=ne, csp=csp, counter=counter,
                 t=t, lang=lang, dir="rtl" if lang == "ar" else "ltr", site_name=SITE_NAME[lang],
                 page=page, nav_key=nav_key, nav=NAV, root=base, api_base=api_base, app_url=app_url, logo=logo,
                 description=t.get(f"desc_{page}", t["desc_default"]), noindex=not in_sitemap,
