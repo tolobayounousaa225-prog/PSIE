@@ -411,3 +411,61 @@ def test_privacy_and_legal_texts_follow_the_analytics_setting(sandbox, tmp_path,
     on = site.build(tmp_path / "b")
     assert "GoatCounter" in (on / "confidentialite.html").read_text(encoding="utf-8") and "GoatCounter" in (on / "mentions.html").read_text(encoding="utf-8")
     assert "OpenStreetMap" in (on / "confidentialite.html").read_text(encoding="utf-8")        # la carte est annoncée dans tous les cas
+
+
+# ---------- statuts en bref, questionnaire, organigramme, affiche, plaquette, graphique ----------
+
+def test_rules_page_has_ten_cards_in_both_languages(dist):
+    for base in (dist, dist / "ar"):
+        text = (base / "statuts.html").read_text(encoding="utf-8")
+        assert text.count('class="card rule tilt"') == 10
+    assert "quinze jours" in (dist / "statuts.html").read_text(encoding="utf-8")
+
+
+def test_eligibility_checker_is_built_from_the_site_conditions(dist):
+    for base in (dist, dist / "ar"):
+        page = parse(base / "adhesion.html")
+        questions = [d for t, d in page.tags if t == "li" and "data-condition" in d]
+        assert len(questions) == 5 and all(q["data-condition"] for q in questions)
+    assert len(content.T["fr"]["elig_questions"]) == len(content.T["fr"]["elig_conditions"]) == len(content.T["ar"]["elig_questions"])
+
+
+def test_interactive_org_chart_markup(dist):
+    page = parse(dist / "gouvernance.html")
+    organs = [d for t, d in page.tags if "data-organ" in d]
+    cards = [d for t, d in page.tags if "data-organ-card" in d]
+    assert len(organs) == 4 and len(cards) == 4
+    assert "organ-panel" in {d.get("id") for _, d in page.tags}
+
+
+def test_qr_codes_and_brochures_are_generated(tmp_path, monkeypatch):
+    monkeypatch.setenv("API_BASE", API)
+    monkeypatch.setenv("SITE_URL", "https://x.github.io/PSIE")
+    d = site.build(tmp_path / "d")
+    for lang in ("fr", "ar"):
+        pdf = (d / "assets" / "dl" / f"plaquette-psie-{lang}.pdf").read_bytes()
+        assert pdf.startswith(b"%PDF") and pdf.count(b"/Type /Page\n") + pdf.count(b"/Type /Page ") >= 1 and len(pdf) > 20000
+        assert (d / "assets" / "dl" / f"qr-psie-{lang}.png").read_bytes().startswith(b"\x89PNG")
+        assert b"<svg" in (d / "assets" / "dl" / f"qr-psie-{lang}.svg").read_bytes()
+    poster = (d / "affiche.html").read_text(encoding="utf-8")
+    assert "https://x.github.io/PSIE/ar/" in poster and poster.count('class="poster ') == 2
+    assert "affiche.html" in (d / "sitemap.xml").read_text(encoding="utf-8")
+
+
+def test_poster_without_site_address_explains_why_but_brochures_still_exist(tmp_path, monkeypatch):
+    monkeypatch.setenv("API_BASE", API)
+    monkeypatch.delenv("SITE_URL", raising=False)
+    monkeypatch.delenv("CUSTOM_DOMAIN", raising=False)
+    d = site.build(tmp_path / "d")
+    assert "dès que l'adresse du site sera définie" in (d / "affiche.html").read_text(encoding="utf-8").replace("&#39;", "'")
+    assert (d / "assets" / "dl" / "plaquette-psie-fr.pdf").exists() and not (d / "assets" / "dl" / "qr-psie-fr.svg").exists()
+
+
+def test_size_chart_needs_two_numeric_values(sandbox, tmp_path):
+    write_json(sandbox, "faitieres", [{"slug": "aaa", "sigle": "AAA", "nombre_ecoles": "430+"}, {"slug": "bbb", "sigle": "BBB", "nombre_ecoles": "5"},
+                                      {"slug": "ccc", "sigle": "CCC", "nombre_ecoles": "inconnu"}])
+    d = site.build(tmp_path / "ok")
+    text = (d / "membres.html").read_text(encoding="utf-8")
+    assert 'id="repartition"' in text and text.index("AAA") < text.index("BBB") and "CCC</span>" not in text.split('id="repartition"')[1].split("</section>")[0]
+    write_json(sandbox, "faitieres", [{"slug": "aaa", "sigle": "AAA", "nombre_ecoles": "430+"}])
+    assert 'id="repartition"' not in (site.build(tmp_path / "one") / "membres.html").read_text(encoding="utf-8")

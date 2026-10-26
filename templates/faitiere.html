@@ -11,7 +11,7 @@
       {% if fa.presentation[lang] %}{% for para in fa.presentation[lang].split('\n') if para.strip() %}<p>{{ para }}</p>{% endfor %}
       {% else %}<p class="muted">{{ t.fa_empty }}</p>{% endif %}
     </article>
-    <aside class="card" data-reveal>
+    <div class="card" data-reveal>
       <h2>{{ t.fa_facts }}</h2>
       <dl class="facts">
         <dt>{{ t.fa_status }}</dt><dd>{{ t.cat.fondateur }}</dd>
@@ -22,7 +22,7 @@
         {% if fa.email %}<dt>{{ t.fa_email }}</dt><dd><a href="mailto:{{ fa.email }}">{{ fa.email }}</a></dd>{% endif %}
         {% if fa.site_web %}<dt>{{ t.fa_website }}</dt><dd><a href="{{ fa.site_web }}" rel="noopener noreferrer" target="_blank">{{ fa.site_web }}</a></dd>{% endif %}
       </dl>
-    </aside>
+    </div>
   </div>
   <div class="wrap"><p class="cta-row"><a class="btn outline" href="membres.html">{{ t.fa_back }}</a></p></div>
 </section>

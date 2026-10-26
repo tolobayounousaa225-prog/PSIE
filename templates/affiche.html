@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.poster_title, t.poster_lead, t.nav_poster) }}
+<section class="section">
+  <div class="wrap">
+    {% if qr %}
+    <div class="posters" data-stagger>
+      {% for q in qr %}
+      <article class="poster {{ q.lang }}" data-reveal lang="{{ q.lang }}" dir="{{ 'rtl' if q.lang == 'ar' else 'ltr' }}">
+        {% if logo %}<img class="poster-logo" src="{{ root }}assets/{{ logo }}" alt="" width="84" height="84">{% endif %}
+        <p class="poster-org">{{ q.org }}</p>
+        <h2>{{ q.heading }}</h2>
+        <img class="poster-qr" src="{{ root }}assets/dl/qr-psie-{{ q.lang }}.svg" alt="QR code — {{ q.url }}" width="260" height="260">
+        <p class="poster-url" dir="ltr">{{ q.url }}</p>
+        <p class="poster-tag">{{ q.tag }}</p>
+        <div class="poster-actions">
+          <button type="button" class="btn dark" data-print="{{ q.lang }}">{{ t.poster_print }}</button>
+          <a class="btn outline" href="{{ root }}assets/dl/qr-psie-{{ q.lang }}.svg" download>{{ t.poster_svg }}</a>
+          <a class="btn outline" href="{{ root }}assets/dl/qr-psie-{{ q.lang }}.png" download>{{ t.poster_png }}</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}<p class="alert">{{ t.poster_no_url }}</p>{% endif %}
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.brochure_title, t.brochure_text) }}
+    <p class="cta-row" data-reveal>
+      <a class="btn" href="{{ root }}assets/dl/plaquette-psie-fr.pdf" download>{{ icon('file') }}{{ t.brochure_fr }}</a>
+      <a class="btn dark" href="{{ root }}assets/dl/plaquette-psie-ar.pdf" download>{{ icon('file') }}{{ t.brochure_ar }}</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

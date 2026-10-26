@@ -11,7 +11,18 @@
     <p id="fallback" class="alert" hidden>{{ t.unavailable }}</p>
   </div>
 </section>
-<section class="section alt">
+{% if bars|length >= 2 %}
+<section class="section alt" id="repartition">
+  <div class="wrap">
+    {{ section_head('', t.bars_title, t.bars_note) }}
+    <ul class="bars" data-unit="{{ t.bars_unit }}">
+      {% for b in bars %}<li data-value="{{ b.value }}" data-max="{{ bars[0].value }}"><span class="bar-label">{{ b.sigle }}</span>
+        <span class="bar-track" aria-hidden="true"><span class="bar-fill"></span></span><span class="bar-num">{{ b.text }} {{ t.bars_unit }}</span></li>{% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+<section class="section">
   <div class="wrap">
     {{ section_head('', t.categories_title, '') }}
     <div class="grid cols-3" data-stagger>
