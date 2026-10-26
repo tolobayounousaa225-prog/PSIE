@@ -31,6 +31,7 @@ LOGOS = ("logo.svg", "logo.png", "logo.webp")
 DATA = ROOT / "data"
 ASSET_RE = re.compile(r"^assets/[A-Za-z0-9._/-]+\.(jpg|jpeg|png|webp|svg|pdf)$", re.I)
 LINK_RE = re.compile(r"^https://[^\s\"'<>]+$")
+SITE_RE = re.compile(r"^https?://[^\s\"'<>]+$")   # sites externes des faîtières : certains n'ont pas encore de https
 COUNTER_RE = re.compile(r"^[a-z0-9-]{2,40}$")
 # Pages du menu principal (les autres sont dans le pied de page)
 NAV = [("index", "nav_home"), ("apropos", "nav_about"), ("gouvernance", "nav_gov"), ("membres", "nav_members"),
@@ -60,9 +61,11 @@ def asset_path(where: str, value) -> str:
     return value
 
 
-def safe_link(where: str, value) -> str:
+def safe_link(where: str, value, allow_http: bool = False) -> str:
     value = (value or "").strip()
-    if value and not LINK_RE.match(value):
+    if value and "://" not in value and allow_http:
+        value = "https://" + value                      # « lecim-ci.org » -> « https://lecim-ci.org »
+    if value and not (SITE_RE if allow_http else LINK_RE).match(value):
         sys.exit(f"{where} : le lien doit commencer par https:// et ne pas contenir d'espace (« {value} »).")
     return value
 
@@ -123,7 +126,7 @@ def load_site_data() -> dict:
             "logo": asset_path(f"data/faitieres.json [{i}] (logo)", f.get("logo")),
             "annee_creation": str(f.get("annee_creation", "")).strip(), "nombre_ecoles": str(f.get("nombre_ecoles", "")).strip(),
             "telephone": str(f.get("telephone", "")).strip(), "email": str(f.get("email", "")).strip(),
-            "adresse": str(f.get("adresse", "")).strip(), "site_web": safe_link(f"data/faitieres.json [{i}] (site_web)", f.get("site_web"))})
+            "adresse": str(f.get("adresse", "")).strip(), "site_web": safe_link(f"data/faitieres.json [{i}] (site_web)", f.get("site_web"), allow_http=True)})
     return out
 
 

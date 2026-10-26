@@ -245,7 +245,8 @@ def test_html_in_data_is_escaped(sandbox, tmp_path):
     ("galerie", [{"image": "http://evil.example/x.jpg"}]),
     ("annonce", {"actif": True, "fr": "x", "ar": "x", "lien": "javascript:alert(1)"}),
     ("faitieres", [{"slug": "Mauvais Slug", "sigle": "X"}]),
-    ("faitieres", [{"slug": "a", "sigle": "A", "site_web": "http://pas-https.example"}]),
+    ("faitieres", [{"slug": "a", "sigle": "A", "site_web": "javascript:alert(1)"}]),
+    ("faitieres", [{"slug": "a", "sigle": "A", "site_web": "https://x.org/a b"}]),
     ("regions", {"pas": "une liste"}),
 ])
 def test_invalid_data_is_refused_with_a_clear_message(sandbox, tmp_path, name, value):
@@ -271,3 +272,9 @@ def test_analytics_is_opt_in_and_widens_csp_only_then(sandbox, tmp_path, monkeyp
     monkeypatch.setenv("GOATCOUNTER", "x\"><script>")
     with pytest.raises(SystemExit):
         site.build(tmp_path / "c")
+
+
+def test_member_website_without_scheme_gets_https(sandbox, tmp_path):
+    write_json(sandbox, "faitieres", [{"slug": "lecim", "sigle": "LECIM", "site_web": "lecim-ci.org"}])
+    d = site.build(tmp_path / "out")
+    assert 'href="https://lecim-ci.org"' in (d / "faitiere-lecim.html").read_text(encoding="utf-8")
