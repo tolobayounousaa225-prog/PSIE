@@ -278,3 +278,13 @@ def test_member_website_without_scheme_gets_https(sandbox, tmp_path):
     write_json(sandbox, "faitieres", [{"slug": "lecim", "sigle": "LECIM", "site_web": "lecim-ci.org"}])
     d = site.build(tmp_path / "out")
     assert 'href="https://lecim-ci.org"' in (d / "faitiere-lecim.html").read_text(encoding="utf-8")
+
+
+def test_interactive_map_markup(dist):
+    page = parse(dist / "regions.html")
+    ids = {d.get("id") for _, d in page.tags}
+    assert {"civ-map", "civ-info", "region-search", "region-list"} <= ids
+    actions = [d.get("data-map") for t, d in page.tags if t == "button" and d.get("data-map")]
+    assert actions == ["in", "out", "reset"]
+    pins = [d for t, d in page.tags if t == "circle" and "pin" in (d.get("class") or "")]
+    assert len(pins) == 41 and all(p.get("role") == "button" and p.get("tabindex") == "0" and p.get("aria-label") for p in pins)

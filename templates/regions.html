@@ -4,33 +4,38 @@
 {{ page_hero(t.regions_title, t.regions_lead, t.nav_regions) }}
 <section class="section">
   <div class="wrap">
-    {% if data.regions %}
     <div class="regions-layout">
-      <div class="map-card" data-reveal>
-        <svg class="civ-map" viewBox="0 0 {{ data.carte.w }} {{ data.carte.h }}" role="img" aria-label="{{ t.regions_title }}">
-          <path class="land" d="{{ data.carte.path }}"/>
-          {% for r in data.regions if r.x %}<circle class="pin" cx="{{ r.x }}" cy="{{ r.y }}" r="5" data-name="{{ r.drena }}"><title>{{ r.drena }}</title></circle>{% endfor %}
+      <div class="civ-card" data-reveal>
+        <div class="map-tools" role="group" aria-label="{{ t.map_tools }}">
+          <button type="button" data-map="in" aria-label="{{ t.map_zoom_in }}" title="{{ t.map_zoom_in }}">+</button>
+          <button type="button" data-map="out" aria-label="{{ t.map_zoom_out }}" title="{{ t.map_zoom_out }}">−</button>
+          <button type="button" data-map="reset" aria-label="{{ t.map_reset }}" title="{{ t.map_reset }}">⟲</button>
+        </div>
+        <svg class="civ-map" id="civ-map" viewBox="0 0 {{ data.carte.w }} {{ data.carte.h }}" role="group" aria-label="{{ t.regions_title }}" tabindex="0" data-w="{{ data.carte.w }}" data-h="{{ data.carte.h }}">
+          <g class="viewport">
+            <path class="land" d="{{ data.carte.path }}"/>
+            {% for r in data.regions if r.x %}<circle class="pin" cx="{{ r.x }}" cy="{{ r.y }}" r="6" data-i="{{ loop.index0 }}" data-name="{{ r.drena }}" tabindex="0" role="button" aria-label="{{ r.drena }}"><title>{{ r.drena }}</title></circle>{% endfor %}
+          </g>
         </svg>
+        <p class="map-hint muted">{{ t.map_hint }}</p>
+        <div class="civ-info" id="civ-info" aria-live="polite" hidden></div>
       </div>
       <div>
+        {% if data.regions %}
         <label class="search"><span class="sr">{{ t.regions_search }}</span><input id="region-search" type="search" placeholder="{{ t.regions_search }}" autocomplete="off"></label>
         <p class="muted" id="region-count" data-template="{{ t.regions_count }}">{{ t.regions_count|replace('{n}', data.regions|length|string) }}</p>
         <ul class="region-list" id="region-list">
           {% for r in data.regions %}
-          <li data-q="{{ (r.drena ~ ' ' ~ r.region ~ ' ' ~ r.delegue)|lower }}"><strong>{{ r.drena }}</strong>
+          <li data-i="{{ loop.index0 }}" data-q="{{ (r.drena ~ ' ' ~ r.region ~ ' ' ~ r.delegue)|lower }}" data-x="{{ r.x or '' }}" data-y="{{ r.y or '' }}"
+              data-drena="{{ r.drena }}" data-region="{{ r.region }}" data-delegue="{{ r.delegue }}" data-tel="{{ r.telephone }}"{% if r.x %} tabindex="0"{% endif %}><strong>{{ r.drena }}</strong>
             {% if r.region %}<span class="muted">{{ r.region }}</span>{% endif %}
             {% if r.delegue %}<span>{{ t.delegate }} : {{ r.delegue }}</span>{% endif %}
             {% if r.telephone %}<a href="tel:{{ r.telephone|replace(' ', '') }}" dir="ltr">{{ r.telephone }}</a>{% endif %}</li>
           {% endfor %}
         </ul>
+        {% else %}<p class="alert">{{ t.regions_empty }}</p>{% endif %}
       </div>
     </div>
-    {% else %}
-    <div class="regions-layout">
-      <div class="map-card" data-reveal><svg class="civ-map" viewBox="0 0 {{ data.carte.w }} {{ data.carte.h }}" role="img" aria-label="{{ t.regions_title }}"><path class="land" d="{{ data.carte.path }}"/></svg></div>
-      <p class="alert">{{ t.regions_empty }}</p>
-    </div>
-    {% endif %}
   </div>
 </section>
 {% endblock %}
