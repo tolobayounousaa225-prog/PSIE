@@ -57,13 +57,18 @@
   </div>
 </section>
 
+{% if data.actualites or api_base %}
 <section class="section alt" id="home-news-section">
   <div class="wrap">
     {{ section_head(t.nav_news, t.news_home_title, '') }}
-    <div class="grid cols-3" id="home-news"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+    <div class="grid cols-3" id="home-news"{% if data.actualites %} data-static="1"{% endif %}>
+      {% with limit = 3, tag = 'h3' %}{% include "_news_cards.html" %}{% endwith %}
+      {% if api_base and not data.actualites %}<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>{% endif %}
+    </div>
     <p class="cta-row" data-reveal><a class="btn outline" href="actualites.html">{{ t.see_all }}</a></p>
   </div>
 </section>
+{% endif %}
 
 {% include "_president.html" %}
 

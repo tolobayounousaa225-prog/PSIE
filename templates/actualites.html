@@ -4,7 +4,11 @@
 {{ page_hero(t.nav_news, '', t.nav_news) }}
 <section class="section">
   <div class="wrap">
-    <div id="actualites-list" class="grid cols-3" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+    <div id="actualites-list" class="grid cols-3" aria-live="polite"{% if data.actualites %} data-static="1"{% endif %}>
+      {% with limit = 0, tag = 'h2' %}{% include "_news_cards.html" %}{% endwith %}
+      {% if api_base and not data.actualites %}<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>{% endif %}
+    </div>
+    {% if not data.actualites and not api_base %}<p class="alert">{{ t.news_none }}</p>{% endif %}
     <p id="fallback" class="alert" hidden>{{ t.unavailable }}</p>
     <noscript><p class="alert">{{ t.no_js }}</p></noscript>
   </div>

@@ -1,0 +1,10 @@
+{% from "_macros.html" import icon with context %}
+{# Cartes d'actualités publiées dans data/actualites.json ; `limit` = nombre maximum (0 = toutes) #}
+{% for n in (data.actualites[:limit] if limit else data.actualites) %}
+<article class="card news-card tilt" data-reveal>
+  <time datetime="{{ n.date }}">{{ n.date_long[lang] }}</time>
+  <{{ tag }}>{{ n.titre[lang] or n.titre.fr }}</{{ tag }}>
+  {% set sm = n.resume[lang] or n.resume.fr %}{% if sm %}<p>{{ sm }}</p>{% endif %}
+  <a href="actualite-{{ n.slug }}.html">{{ t.read_more }}{{ icon('arrow', 'flip') }}</a>
+</article>
+{% endfor %}

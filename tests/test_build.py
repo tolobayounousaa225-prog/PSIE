@@ -229,7 +229,7 @@ def test_filled_data_is_rendered(sandbox, tmp_path):
     assert "assets/docs/statuts.pdf" in parse(d / "documents.html").links
     home = (d / "index.html").read_text(encoding="utf-8")
     assert "AG le 15 décembre" in home and 'href="https://example.org/ag"' in home and "Le mot du Président" in home
-    assert "<circle" in (d / "regions.html").read_text(encoding="utf-8")
+    assert 'data-lat="7.69"' in (d / "regions.html").read_text(encoding="utf-8")
 
 
 def test_html_in_data_is_escaped(sandbox, tmp_path):
@@ -284,7 +284,66 @@ def test_interactive_map_markup(dist):
     page = parse(dist / "regions.html")
     ids = {d.get("id") for _, d in page.tags}
     assert {"civ-map", "civ-info", "region-search", "region-list"} <= ids
-    actions = [d.get("data-map") for t, d in page.tags if t == "button" and d.get("data-map")]
-    assert actions == ["in", "out", "reset"]
-    pins = [d for t, d in page.tags if t == "circle" and "pin" in (d.get("class") or "")]
-    assert len(pins) == 41 and all(p.get("role") == "button" and p.get("tabindex") == "0" and p.get("aria-label") for p in pins)
+    assert "assets/vendor/leaflet/leaflet.js" in page.links and "assets/vendor/leaflet/leaflet.css" in page.links
+    assert (dist / "assets" / "vendor" / "leaflet" / "leaflet.js").exists() and (dist / "assets" / "vendor" / "leaflet" / "LICENSE").exists()
+    rows = [d for t, d in page.tags if t == "li" and "data-lat" in d]
+    located = [d for d in rows if d["data-lat"] != ""]
+    assert len(rows) == 41 and len(located) == 41 and all(d.get("tabindex") == "0" for d in located)
+
+
+def test_map_tiles_are_allowed_only_on_the_map_page(dist):
+    def csp(name):
+        return htmllib.unescape(re.search(r'http-equiv="Content-Security-Policy" content="([^"]*)"', (dist / name).read_text(encoding="utf-8")).group(1))
+    assert "https://tile.openstreetmap.org" in csp("regions.html") and "https://tile.openstreetmap.org" in csp("ar/regions.html")
+    for other in ("index.html", "membres.html", "contact.html", "faitiere-lecim.html"):
+        assert "openstreetmap" not in csp(other), other
+    assert "script-src 'self';" in csp("regions.html")          # aucun script tiers : Leaflet est dans le site
+
+
+def test_region_coordinates_outside_the_country_are_refused(sandbox, tmp_path):
+    write_json(sandbox, "regions", [{"drena": "Erreur", "lat": 48.85, "lon": 2.35}])
+    with pytest.raises(SystemExit) as e:
+        site.build(tmp_path / "out")
+    assert "hors de la Côte d'Ivoire" in str(e.value)
+
+
+# ---------- actualités publiées dans le site ----------
+
+def test_news_without_data_or_server_shows_a_message_not_a_loading_placeholder(tmp_path, monkeypatch):
+    monkeypatch.delenv("API_BASE", raising=False)
+    monkeypatch.delenv("APP_URL", raising=False)
+    d = site.build(tmp_path / "d")
+    news = (d / "actualites.html").read_text(encoding="utf-8")
+    assert "skeleton" not in news and "Aucune actualité pour le moment" in news
+    assert 'id="home-news-section"' not in (d / "index.html").read_text(encoding="utf-8")
+
+
+def test_news_with_server_but_no_published_items_keeps_loading_placeholders(dist):
+    assert "skeleton" in (dist / "actualites.html").read_text(encoding="utf-8")
+
+
+def test_published_news_pages_and_cards(sandbox, tmp_path):
+    write_json(sandbox, "actualites", [
+        {"slug": "ag-2026", "date": "2026-12-15", "titre": {"fr": "AG <b>2026</b>", "ar": "الجمعية"},
+         "resume": {"fr": "Rendez-vous à Bouaké.", "ar": "موعد ببواكي."}, "contenu": {"fr": "Premier paragraphe.\nSecond.", "ar": "نص"}},
+        {"slug": "ouverture", "date": "2026-10-20", "titre": {"fr": "Ouverture", "ar": "فتح"}, "resume": {"fr": "x", "ar": "x"}, "contenu": {"fr": "y", "ar": "y"}},
+    ])
+    d = site.build(tmp_path / "out")
+    assert (d / "actualite-ag-2026.html").exists() and (d / "ar" / "actualite-ag-2026.html").exists()
+    listing = (d / "actualites.html").read_text(encoding="utf-8")
+    assert listing.index("AG &lt;b&gt;2026") < listing.index("Ouverture")        # la plus récente d'abord, texte échappé
+    assert "15 décembre 2026" in listing and "skeleton" not in listing
+    assert "<b>2026</b>" not in listing
+    assert "Second." in (d / "actualite-ag-2026.html").read_text(encoding="utf-8")
+    assert "actualite-ag-2026.html" in (d / "sitemap.xml").read_text(encoding="utf-8") if (d / "sitemap.xml").exists() else True
+    assert 'id="home-news-section"' in (d / "index.html").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("item", [
+    {"slug": "Mauvais Slug", "date": "2026-12-15"}, {"slug": "ok", "date": "15/12/2026"}, {"slug": "ok", "date": "2026-13-40"},
+])
+def test_invalid_news_is_refused(sandbox, tmp_path, item):
+    write_json(sandbox, "actualites", [item])
+    with pytest.raises(SystemExit) as e:
+        site.build(tmp_path / "out")
+    assert "actualites.json" in str(e.value)
