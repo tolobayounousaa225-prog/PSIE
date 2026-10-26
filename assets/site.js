@@ -299,6 +299,29 @@
     } else fillBars();
   }
 
+  // ---------- Centre de transparence : filtres par type et par année ----------
+  var tFilters = document.querySelector(".filters");
+  if (tFilters) {
+    var tState = { kind: "", year: "" }, tCards = Array.prototype.slice.call(document.querySelectorAll("#transp-list [data-kind]"));
+    var tGroups = Array.prototype.slice.call(document.querySelectorAll("#transp-list .year-group")), tNone = document.getElementById("transp-none");
+    var applyFilters = function () {
+      tCards.forEach(function (c) { c.hidden = (tState.kind && c.dataset.kind !== tState.kind) || (tState.year && c.dataset.year !== tState.year); });
+      var shown = 0;
+      tGroups.forEach(function (g) { var any = g.querySelector("[data-kind]:not([hidden])"); g.hidden = !any; if (any) shown++; });
+      if (tNone) tNone.hidden = shown > 0;
+    };
+    tFilters.querySelectorAll(".chips").forEach(function (group) {
+      group.querySelectorAll(".chip").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          group.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("on"); c.setAttribute("aria-pressed", "false"); });
+          chip.classList.add("on"); chip.setAttribute("aria-pressed", "true");
+          tState[group.dataset.filter] = chip.dataset.value;
+          applyFilters();
+        });
+      });
+    });
+  }
+
   // ---------- Affiche : impression de la version choisie ----------
   document.querySelectorAll("[data-print]").forEach(function (b) {
     b.addEventListener("click", function () {

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.guide_title, t.guide_lead, t.nav_guide) }}
+<section class="section">
+  <div class="wrap">
+    {% if not app_url %}<p class="alert" data-reveal>{{ t.guide_soon }}</p>{% endif %}
+    <ol class="rules" data-stagger>
+      {% for s in t.guide_steps %}
+      <li class="card rule tilt" data-reveal>
+        <span class="num" aria-hidden="true">{{ loop.index }}</span>
+        <div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(s.i) }}</div>
+        <h2>{{ s.t }}</h2>
+        <p>{{ s.d }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="cta-row" data-reveal>
+      {% if app_url %}<a class="btn dark" href="{{ app_url }}/login">{{ t.guide_login }}{{ icon('arrow', 'flip') }}</a>
+      <a class="btn outline" href="{{ app_url }}/adhesion/suivi">{{ t.guide_track }}</a>{% endif %}
+      <a class="btn outline" href="verification.html">{{ t.guide_verify }}</a>
+    </p>
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.guide_faq_title, '') }}
+    <div class="faq" data-stagger>
+      {% for item in t.guide_faq %}<details data-reveal><summary><span>{{ item.q }}</span>{{ icon('chevron') }}</summary><div class="ans">{{ item.a }}</div></details>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
