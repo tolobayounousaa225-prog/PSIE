@@ -1,19 +1,83 @@
 {% extends "base.html" %}
-{% block title %}{{ t.nav_home }}{% endblock %}
+{% from "_macros.html" import icon, section_head with context %}
 {% block content %}
 <section class="hero">
-  <h1>{{ site_name }}</h1>
-  <p class="lead">{{ t.tagline }}</p>
-  <p>{{ t.intro }}</p>
-  {% if app_url %}<p><a class="btn" href="{{ app_url }}/adhesion">{{ t.join_cta }}</a>
-    <a class="btn ghost" href="{{ app_url }}/adhesion/suivi">{{ t.track }}</a></p>
-  {% else %}<p><span class="btn disabled" aria-disabled="true">{{ t.join_cta }} — {{ t.soon }}</span></p>{% endif %}
+  <span class="orb a" aria-hidden="true"></span><span class="orb b" aria-hidden="true"></span>
+  <div class="wrap">
+    <div>
+      <span class="kicker" data-reveal>{{ icon('spark') }}{{ t.hero_kicker }}</span>
+      <h1 data-reveal>{{ t.hero_title_a }} <span class="hl">{{ t.hero_title_hl }}</span></h1>
+      <p class="lead" data-reveal>{{ t.hero_intro }}</p>
+      <div class="cta-row" data-reveal>
+        {% if app_url %}<a class="btn" href="{{ app_url }}/adhesion">{{ t.join_cta }}{{ icon('arrow', 'flip') }}</a>
+        {% else %}<a class="btn" href="adhesion.html">{{ t.nav_join }}{{ icon('arrow', 'flip') }}</a>{% endif %}
+        <a class="btn ghost" href="apropos.html">{{ t.discover }}</a>
+      </div>
+    </div>
+    <div class="hero-art-wrap" data-reveal="zoom">{% include "_hero_art.html" %}</div>
+  </div>
 </section>
-<section class="card"><h2>{{ t.missions_title }}</h2>
-  <ul>{% for m in t.missions %}<li>{{ m }}</li>{% endfor %}</ul></section>
-<div class="two">
-  <section class="card"><h2>{{ t.principles_title }}</h2><p>{{ t.principles }}</p></section>
-  <section class="card"><h2>{{ t.organs_title }}</h2><p>{{ t.organs }}</p></section>
-</div>
-<section class="card"><h2>{{ t.contact_title }}</h2><p>{{ t.address }}</p><p>{{ t.phones }}</p></section>
+
+<section class="stats">
+  <div class="wrap"><div class="grid" data-stagger>
+    {% for s in t.stats %}<div class="stat" data-reveal><span class="num" data-count="{{ s.value }}">{{ s.value }}</span><span class="lbl">{{ s.label }}</span></div>{% endfor %}
+  </div></div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    {{ section_head(t.nav_about, t.missions_title, t.missions_sub) }}
+    <div class="grid cols-3" data-stagger>
+      {% set icons = ['handshake', 'flag', 'book', 'users', 'shield'] %}
+      {% for m in t.missions %}
+      <article class="card tilt" data-reveal><span class="n" aria-hidden="true">{{ loop.index }}</span>
+        <div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(icons[loop.index0]) }}</div>
+        <h3>{{ m.t }}</h3><p>{{ m.d }}</p></article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head(t.nav_join, t.steps_title, '') }}
+    <div class="timeline" data-stagger>
+      {% for s in t.steps %}<div class="step" data-reveal><div class="bubble" aria-hidden="true"></div><div><h3>{{ s.t }}</h3><p>{{ s.d }}</p></div></div>{% endfor %}
+    </div>
+    <p class="cta-row" data-reveal>{% if app_url %}<a class="btn dark" href="{{ app_url }}/adhesion">{{ t.join_cta }}{{ icon('arrow', 'flip') }}</a>{% endif %}<a class="btn outline" href="adhesion.html">{{ t.learn_more }}</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    {{ section_head('', t.principles_title, '') }}
+    <div class="marquee" data-reveal><div class="marquee-track">
+      {% for rep in range(2) %}{% for p in t.principles %}<span class="chip"{% if rep == 1 %} aria-hidden="true"{% endif %}>{{ icon('check') }}{{ p }}</span>{% endfor %}{% endfor %}
+    </div></div>
+  </div>
+</section>
+
+<section class="section alt" id="home-news-section">
+  <div class="wrap">
+    {{ section_head(t.nav_news, t.news_home_title, '') }}
+    <div class="grid cols-3" id="home-news"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+    <p class="cta-row" data-reveal><a class="btn outline" href="actualites.html">{{ t.see_all }}</a></p>
+  </div>
+</section>
+
+<section class="section dark-band">
+  <div class="wrap">
+    {{ section_head(t.nav_members, t.founders_title, t.members_lead) }}
+    <div class="badges" data-stagger>
+      {% for f in t.founders %}<div class="badge-tile" data-reveal><div class="seal{% if f|length > 6 %} long{% endif %}">{{ f }}</div><div class="ct">{{ t.cat.fondateur }}</div></div>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap"><div class="cta-band" data-reveal="zoom"><div class="wrap">
+    <h2>{{ t.cta_title }}</h2><p>{{ t.cta_text }}</p>
+    <div class="cta-row">{% if app_url %}<a class="btn" href="{{ app_url }}/adhesion">{{ t.join_cta }}{{ icon('arrow', 'flip') }}</a>{% endif %}<a class="btn ghost" href="contact.html">{{ t.nav_contact }}</a></div>
+  </div></div></div>
+</section>
 {% endblock %}

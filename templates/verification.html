@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.verify_title, t.verify_lead, t.nav_verify) }}
+<section class="section">
+  <div class="wrap grid cols-2">
+    <div data-stagger>
+      {% for s in t.verify_steps %}<div class="card" data-reveal><span class="n" aria-hidden="true">{{ loop.index }}</span><p>{{ s }}</p></div>{% endfor %}
+    </div>
+    <div class="map-card" data-reveal="zoom"><div><div class="pin-pulse">{{ icon('qr') }}</div><h3>{{ t.verify_title }}</h3><p>{{ t.verify_note }}</p></div></div>
+  </div>
+</section>
+{% endblock %}

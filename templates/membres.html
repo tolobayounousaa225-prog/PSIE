@@ -1,9 +1,24 @@
 {% extends "base.html" %}
-{% block title %}{{ t.members_title }}{% endblock %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
 {% block content %}
-<h1>{{ t.members_title }}</h1>
-<p class="muted">{{ t.members_help }}</p>
-<div id="membres-list" class="tiles" aria-live="polite"><p class="muted js-loading">{{ t.loading }}</p></div>
-<p id="fallback" class="alert" hidden>{{ t.unavailable }}</p>
-<noscript><p class="alert">{{ t.no_js }}</p></noscript>
+{{ page_hero(t.members_title, t.members_lead, t.nav_members) }}
+<section class="section">
+  <div class="wrap">
+    <div id="membres-list" class="tiles" aria-live="polite">
+      {% for f in t.founders %}<div class="tile"><div class="num{% if f|length > 6 %} long{% endif %}">{{ f }}</div><div class="muted">{{ t.cat.fondateur }}</div></div>{% endfor %}
+    </div>
+    <p id="members-note" class="alert" hidden>{{ t.members_note }}</p>
+    <p id="fallback" class="alert" hidden>{{ t.unavailable }}</p>
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.categories_title, '') }}
+    <div class="grid cols-3" data-stagger>
+      {% set icons = ['flag', 'users', 'spark'] %}
+      {% for c in t.categories %}<article class="card tilt" data-reveal><div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(icons[loop.index0]) }}</div><h3>{{ c.t }}</h3><p>{{ c.d }}</p></article>{% endfor %}
+    </div>
+    <p class="cta-row" data-reveal><a class="btn dark" href="adhesion.html">{{ t.nav_join }}{{ icon('arrow', 'flip') }}</a></p>
+  </div>
+</section>
 {% endblock %}

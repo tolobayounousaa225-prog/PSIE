@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.gov_title, t.gov_lead, t.nav_gov) }}
+<section class="section">
+  <div class="wrap">
+    <div class="chart" data-reveal>
+      <div class="node top"><div class="ico">{{ icon('users') }}</div><div><b>{{ t.chart_ag }}</b><small>{{ t.chart_ag_sub }}</small></div></div>
+      <div class="vline"></div>
+      <div class="chart-row">
+        <div class="node"><div class="ico">{{ icon('scale') }}</div><div><b>{{ t.chart_ca }}</b><small>{{ t.chart_ca_sub }}</small></div></div>
+        <div class="node"><div class="ico gold">{{ icon('flag') }}</div><div><b>{{ t.chart_den }}</b><small>{{ t.chart_den_sub }}</small></div></div>
+        <div class="node"><div class="ico">{{ icon('shield') }}</div><div><b>{{ t.chart_cc }}</b><small>{{ t.chart_cc_sub }}</small></div></div>
+      </div>
+      <div class="vline"></div>
+      <div class="chart-row">
+        <div class="node"><div class="ico gold">{{ icon('book') }}</div><div><b>{{ t.chart_com }}</b><small>{{ t.chart_com_sub }}</small></div></div>
+        <div class="node"><div class="ico">{{ icon('pin') }}</div><div><b>{{ t.chart_reg }}</b><small>{{ t.chart_reg_sub }}</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.gov_title, '') }}
+    <div class="grid cols-2" data-stagger>
+      {% set icons = ['users', 'scale', 'flag', 'shield'] %}
+      {% for o in t.organs %}
+      <article class="card tilt" data-reveal>
+        <div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(icons[loop.index0]) }}</div>
+        <span class="tag">{{ o.tag }}</span><h3>{{ o.name }}</h3>
+        <ul>{% for p in o.points %}<li>{{ p }}</li>{% endfor %}</ul>
+      </article>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    {{ section_head('', t.commissions_title, '') }}
+    <div class="grid cols-2" data-stagger>
+      {% for c in t.commissions %}
+      <article class="card tilt" data-reveal>
+        <span class="tag">{{ c.sigle }}</span><h3>{{ c.name }}</h3>
+        <ul>{% for p in c.points %}<li>{{ p }}</li>{% endfor %}</ul>
+      </article>{% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section dark-band">
+  <div class="wrap grid cols-2">
+    <div data-reveal="left"><span class="eyebrow">{{ t.nav_gov }}</span><h2>{{ t.regional_title }}</h2><p>{{ t.regional }}</p></div>
+    <div data-reveal="right"><h2>{{ t.transparency_title }}</h2>
+      <ul class="check-list">{% for p in t.transparency %}<li>{{ icon('check') }}<span>{{ p }}</span></li>{% endfor %}</ul></div>
+  </div>
+</section>
+{% endblock %}

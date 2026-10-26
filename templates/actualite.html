@@ -1,8 +1,13 @@
 {% extends "base.html" %}
-{% block title %}{{ t.news_title }}{% endblock %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
 {% block content %}
-<article id="actualite" class="card" aria-live="polite"><p class="muted js-loading">{{ t.loading }}</p></article>
-<p id="fallback" class="alert" hidden>{{ t.unavailable }}</p>
-<noscript><p class="alert">{{ t.no_js }}</p></noscript>
-<p><a href="actualites.html">{{ t.back }}</a></p>
+{{ page_hero(t.nav_news, '', t.nav_news) }}
+<section class="section">
+  <div class="wrap">
+    <article id="actualite" class="card"><div class="skeleton"></div></article>
+    <p id="fallback" class="alert" hidden>{{ t.unavailable }}</p>
+    <noscript><p class="alert">{{ t.no_js }}</p></noscript>
+    <p><a href="actualites.html">{{ t.back }}</a></p>
+  </div>
+</section>
 {% endblock %}

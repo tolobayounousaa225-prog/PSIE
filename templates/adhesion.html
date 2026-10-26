@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.join_title, t.join_lead, t.nav_join) }}
+<section class="section">
+  <div class="wrap grid cols-2">
+    <article class="card" data-reveal="left">
+      <div class="ico">{{ icon('check') }}</div>
+      <h3>{{ t.conditions_title }}</h3>
+      <p>{{ t.conditions_intro }}</p>
+      <ul class="check-list dark">{% for c in t.conditions %}<li>{{ icon('check') }}<span>{{ c }}</span></li>{% endfor %}</ul>
+    </article>
+    <article class="card" data-reveal="right">
+      <div class="ico gold">{{ icon('file') }}</div>
+      <h3>{{ t.join_online }}</h3>
+      <p>{{ t.process_note }}</p>
+      <div class="cta-row">
+        {% if app_url %}<a class="btn dark" href="{{ app_url }}/adhesion">{{ t.join_online }}{{ icon('arrow', 'flip') }}</a>
+        {% else %}<span class="btn disabled" aria-disabled="true">{{ t.soon }}</span>{% endif %}
+      </div>
+      <p class="muted">{{ t.join_track_text }}</p>
+      {% if app_url %}<a class="btn outline" href="{{ app_url }}/adhesion/suivi">{{ t.track }}</a>{% endif %}
+    </article>
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.process_title, '') }}
+    <div class="timeline" data-stagger>
+      {% for s in t.steps %}<div class="step" data-reveal><div class="bubble" aria-hidden="true"></div><div><h3>{{ s.t }}</h3><p>{{ s.d }}</p></div></div>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

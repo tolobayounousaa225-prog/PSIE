@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.contact_title, t.contact_lead, t.nav_contact) }}
+<section class="section">
+  <div class="wrap grid cols-2">
+    <div class="grid" data-stagger>
+      <article class="card contact-card" data-reveal><div class="ico">{{ icon('pin') }}</div><div><h3>{{ t.address_label }}</h3><p>{{ t.address }}</p></div></article>
+      <article class="card contact-card" data-reveal><div class="ico gold">{{ icon('phone') }}</div><div><h3>{{ t.phone_label }}</h3>
+        <p><a href="tel:{{ t.phone1|replace(' ', '') }}" dir="ltr">{{ t.phone1 }}</a><br><a href="tel:{{ t.phone2|replace(' ', '') }}" dir="ltr">{{ t.phone2 }}</a></p></div></article>
+      <p class="muted" data-reveal>{{ t.contact_note }}</p>
+      <div class="cta-row" data-reveal>{% if app_url %}<a class="btn dark" href="{{ app_url }}/adhesion">{{ t.join_cta }}{{ icon('arrow', 'flip') }}</a>{% endif %}</div>
+    </div>
+    <div class="map-card" data-reveal="zoom"><div><div class="pin-pulse">{{ icon('pin') }}</div><h3>{{ t.address }}</h3>
+      <p><a class="btn" href="https://www.openstreetmap.org/search?query=Mosqu%C3%A9e%20AL%20FATH%20Treichville%20Abidjan" rel="noopener noreferrer" target="_blank">{{ t.map }}{{ icon('arrow', 'flip') }}</a></p></div></div>
+  </div>
+</section>
+{% endblock %}
