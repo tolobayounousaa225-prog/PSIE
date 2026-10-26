@@ -91,12 +91,6 @@ def long_date(iso: str, lang: str) -> str:
 
 
 def load_site_data() -> dict:
-    carte = read_data("_carte", {})
-    lon0, lat1, k, S = carte["lon0"], carte["lat1"], carte["k"], carte["S"]
-
-    def project(lat, lon):
-        return round((lon - lon0) * k * S + 10, 1), round((lat1 - lat) * S + 10, 1)
-
     annonce = read_data("annonce", {})
     president = read_data("president", {})
     documents, galerie, regions, faitieres, actualites = (
@@ -107,7 +101,6 @@ def load_site_data() -> dict:
             sys.exit(f"data/{name}.json : une liste [ ... ] est attendue.")
 
     out = {
-        "carte": carte,
         "annonce": {"actif": bool(annonce.get("actif")), "texte": bi("data/annonce.json", {"fr": annonce.get("fr"), "ar": annonce.get("ar")}),
                     "lien": safe_link("data/annonce.json", annonce.get("lien"))},
         "president": {"nom": str(president.get("nom", "")).strip(), "fonction": bi("president.fonction", president.get("fonction", "")),
@@ -137,9 +130,12 @@ def load_site_data() -> dict:
                                "date": str(g.get("date", ""))})
     for i, r in enumerate(regions, 1):
         item = {"drena": str(r.get("drena", "")).strip(), "region": str(r.get("region", "")).strip(),
-                "delegue": str(r.get("delegue", "")).strip(), "telephone": str(r.get("telephone", "")).strip(), "x": None, "y": None}
-        if isinstance(r.get("lat"), (int, float)) and isinstance(r.get("lon"), (int, float)):
-            item["x"], item["y"] = project(r["lat"], r["lon"])
+                "delegue": str(r.get("delegue", "")).strip(), "telephone": str(r.get("telephone", "")).strip(), "lat": None, "lon": None}
+        lat, lon = r.get("lat"), r.get("lon")
+        if isinstance(lat, (int, float)) and isinstance(lon, (int, float)) and not isinstance(lat, bool) and not isinstance(lon, bool):
+            if not (3.5 <= lat <= 11.5 and -9.5 <= lon <= -2.0):
+                sys.exit(f"data/regions.json [{i}] ({item['drena']}) : coordonnées hors de la Côte d'Ivoire (lat {lat}, lon {lon}).")
+            item["lat"], item["lon"] = float(lat), float(lon)
         out["regions"].append(item)
     seen = set()
     for i, f in enumerate(faitieres, 1):
@@ -187,10 +183,13 @@ def build(dist: Path | None = None) -> Path:
     site_data = load_site_data()
     pages = (list(PAGES) + [(f"faitiere-{f['slug']}", "nav_members", True) for f in site_data["faitieres"]]
              + [(f"actualite-{n['slug']}", "nav_news", True) for n in site_data["actualites"]])
-    csp = ("default-src 'self'; script-src 'self'" + (" https://gc.zgo.at" if counter else "") + "; style-src 'self'; "
-           "img-src 'self' data:" + (f" https://{counter}.goatcounter.com" if counter else "") + "; "
-           f"connect-src {api_base or chr(39) + 'none' + chr(39)}" + (f" https://{counter}.goatcounter.com" if counter else "") +
-           "; base-uri 'none'; form-action 'none'; object-src 'none'")
+    def csp_for(page: str) -> str:
+        """Politique de sécurité : élargie seulement là où c'est nécessaire (fonds de carte, statistiques)."""
+        img = ["'self'", "data:"] + (["https://tile.openstreetmap.org"] if page == "regions" else []) + ([f"https://{counter}.goatcounter.com"] if counter else [])
+        script = ["'self'"] + (["https://gc.zgo.at"] if counter else [])
+        connect = [api_base or "'none'"] + ([f"https://{counter}.goatcounter.com"] if counter else [])
+        return (f"default-src 'self'; script-src {' '.join(script)}; style-src 'self'; img-src {' '.join(img)}; "
+                f"connect-src {' '.join(connect)}; base-uri 'none'; form-action 'none'; object-src 'none'")
 
     if dist.exists():
         shutil.rmtree(dist)
@@ -218,7 +217,7 @@ def build(dist: Path | None = None) -> Path:
             fa = next((f for f in site_data["faitieres"] if page == f"faitiere-{f['slug']}"), None)
             ne = next((n for n in site_data["actualites"] if page == f"actualite-{n['slug']}"), None)
             html = env.get_template("faitiere.html" if fa else "actualite_article.html" if ne else f"{page}.html").render(
-                data=site_data, fa=fa, ne=ne, csp=csp, counter=counter,
+                data=site_data, fa=fa, ne=ne, csp=csp_for(page), counter=counter,
                 t=t, lang=lang, dir="rtl" if lang == "ar" else "ltr", site_name=SITE_NAME[lang],
                 page=page, nav_key=nav_key, nav=NAV, root=base, api_base=api_base, app_url=app_url, logo=logo,
                 description=t.get(f"desc_{page}", t["desc_default"]), noindex=not in_sitemap,

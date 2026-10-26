@@ -354,25 +354,11 @@ p { margin: 0 0 1em; }
 /* ---------- Représentations régionales ---------- */
 .regions-layout { display: grid; grid-template-columns: minmax(300px, 520px) 1fr; gap: 36px; align-items: start; }
 .civ-card { position: sticky; top: 96px; padding: 20px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
-.civ-map { width: 100%; height: auto; display: block; touch-action: none; cursor: grab; border-radius: 12px; user-select: none; -webkit-user-select: none; }
-.civ-map.dragging { cursor: grabbing; }
-.civ-map:focus-visible { outline: 3px solid var(--gold-300); outline-offset: 2px; }
-.map-tools { position: absolute; top: 28px; inset-inline-end: 28px; z-index: 2; display: flex; flex-direction: column; gap: 6px; }
-.map-tools button { width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: inherit; font: 700 1.2rem var(--font); cursor: pointer; box-shadow: var(--shadow-sm); transition: transform .2s var(--ease), background .2s; }
-.map-tools button:hover { transform: scale(1.08); background: var(--gold-100); }
-.map-tools button:focus-visible { outline: 3px solid var(--gold-300); }
-.map-hint { font-size: .82rem; margin: 10px 0 0; }
 .civ-info { margin-top: 12px; padding: 14px 16px; border-radius: 14px; background: var(--emerald-100); border-inline-start: 4px solid var(--gold-500); position: relative; animation: fade-down .35s var(--ease); }
 .civ-info[hidden] { display: none; }
 .civ-info h3 { margin: 0 0 6px; font-size: 1.05rem; } .civ-info p { margin: 2px 0; font-size: .92rem; }
 .civ-info .close { position: absolute; top: 6px; inset-inline-end: 8px; background: none; border: 0; font-size: 1.3rem; cursor: pointer; color: inherit; }
-@media (prefers-color-scheme: dark) { .civ-info { background: rgba(255,255,255,.08); } .map-tools button:hover { background: rgba(255,255,255,.15); } }
-.civ-map .land { fill: var(--emerald-100, #d8efe3); stroke: var(--emerald-700); stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.civ-map .pin { fill: var(--gold-500); stroke: #fff; stroke-width: 1.5; vector-effect: non-scaling-stroke; cursor: pointer; transition: opacity .3s, fill .2s; outline: none; }
-.civ-map .pin:hover, .civ-map .pin:focus-visible { fill: var(--emerald-700); }
-.civ-map .pin.active { fill: var(--emerald-700); stroke: var(--gold-300); stroke-width: 3; }
-.civ-map .pin.dim { opacity: .15; }
-@media (prefers-color-scheme: dark) { .civ-map .land { fill: rgba(255,255,255,.08); stroke: var(--emerald-300); } }
+@media (prefers-color-scheme: dark) { .civ-info { background: rgba(255,255,255,.08); } }
 .search input { width: 100%; padding: 14px 18px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: inherit; font: inherit; }
 .search input:focus { outline: 3px solid var(--gold-300); border-color: var(--gold-500); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -392,3 +378,14 @@ a.tile, a.badge-tile { color: inherit; text-decoration: none; display: block; }
 .region-list li[tabindex] { cursor: pointer; } .region-list li[tabindex]:hover, .region-list li.active { border-color: var(--gold-500); box-shadow: var(--shadow-sm); } .region-list li:focus-visible { outline: 3px solid var(--gold-300); }
 
 .article h2 { margin: 6px 0 14px; font-size: 1.6rem; } .article-img { width: 100%; max-height: 420px; object-fit: cover; border-radius: 14px; margin-bottom: 16px; } .article .prose p { line-height: 1.8; }
+
+/* ---------- Carte Leaflet (fond OpenStreetMap) ---------- */
+.civ-leaflet { height: 520px; border-radius: 14px; overflow: hidden; z-index: 0; background: var(--emerald-100); }
+.civ-leaflet:focus-visible { outline: 3px solid var(--gold-300); outline-offset: 2px; }
+.map-hint { font-size: .82rem; margin: 10px 0 0; }
+.civ-leaflet .leaflet-control-zoom a { color: var(--ink, #111); }
+.civ-leaflet .leaflet-tooltip.drena-label { background: rgba(255,255,255,.92); border: 1px solid var(--gold-500); color: var(--emerald-950); font: 700 .74rem var(--font); padding: 2px 7px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.2); display: none; }
+.civ-leaflet.show-labels .leaflet-tooltip.drena-label { display: block; }
+.civ-leaflet .drena-dot { cursor: pointer; transition: opacity .3s; }
+.civ-leaflet .leaflet-attribution-flag { display: none !important; }
+@media (max-width: 860px) { .civ-leaflet { height: 420px; } }

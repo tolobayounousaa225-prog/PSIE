@@ -498,3 +498,13 @@ T["ar"].update({
     "map_hint": "اسحب للتحريك، Ctrl + عجلة الفأرة أو إصبعان للتكبير، انقر على نقطة لعرض المديرية.",
     "map_close": "إغلاق", "map_here": "المديريات في هذا الموقع",
 })
+
+T["fr"].update({
+    "map_attribution": "© contributeurs OpenStreetMap", "map_labels": "Noms des DRENA affichés à partir d'un certain zoom.",
+    "map_unavailable": "La carte n'a pas pu être chargée. La liste des DRENA reste disponible ci-contre.",
+})
+T["ar"].update({
+    "map_attribution": "© مساهمو OpenStreetMap", "map_labels": "تظهر أسماء المديريات عند التكبير.",
+    "map_unavailable": "تعذر تحميل الخريطة. تبقى قائمة المديريات متاحة بجانبها.",
+})
+T["fr"]["map_hint"] = "Glissez pour déplacer, Ctrl + molette ou deux doigts pour zoomer, cliquez sur un point pour voir la DRENA."

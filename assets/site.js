@@ -258,167 +258,98 @@
       var q = norm(search.value.trim()), n = 0;
       items.forEach(function (li) { var ok = !q || norm(li.dataset.q).indexOf(q) !== -1; li.hidden = !ok; if (ok) n++; });
       count.textContent = tpl.replace("{n}", String(n));
-      document.querySelectorAll(".civ-map .pin").forEach(function (c) { c.classList.toggle("dim", !!q && norm(c.dataset.name).indexOf(q) === -1); });
+      if (window.psieMapFilter) window.psieMapFilter(q, norm);
     });
   }
 
-  // ---------- Carte interactive : zoom, déplacement, fiche au clic ----------
+  // ---------- Carte des DRENA (Leaflet + fond OpenStreetMap, comme la plateforme LECIM) ----------
   var civ = document.getElementById("civ-map");
   if (civ) {
-    var W = parseFloat(civ.dataset.w), H = parseFloat(civ.dataset.h);
-    var vp = civ.querySelector(".viewport");
-    var pins = Array.prototype.slice.call(civ.querySelectorAll(".pin"));
     var rows = Array.prototype.slice.call(document.querySelectorAll("#region-list li"));
     var info = document.getElementById("civ-info");
-    var MAXZ = 8, view = { s: 1, x: 0, y: 0 }, anim = null, active = null;
+    var mapFallback = document.getElementById("map-fallback");
+    if (!window.L) { if (mapFallback) mapFallback.hidden = false; civ.hidden = true; }
+    else {
+      var map = L.map(civ, { zoomSnap: 0.25, minZoom: 6, maxZoom: 14, scrollWheelZoom: false, worldCopyJump: false })
+        .setView([7.54, -5.55], 6.5);
+      map.attributionControl.setPrefix(false);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: civ.dataset.attribution || "© OpenStreetMap", maxZoom: 19 }).addTo(map);
+      map.setMaxBounds([[2.5, -11.5], [12.5, 0.5]]);       // reste autour de la Côte d'Ivoire
+      var tileFail = 0;
+      map.eachLayer(function (l) { if (l.on) l.on("tileerror", function () { if (++tileFail === 6 && mapFallback) mapFallback.hidden = false; }); });
 
-    var clampView = function (v) {
-      v.s = clamp(v.s, 1, MAXZ);
-      v.x = clamp(v.x, W * (1 - v.s), 0);
-      v.y = clamp(v.y, H * (1 - v.s), 0);
-      return v;
-    };
-    var paint = function () {
-      vp.setAttribute("transform", "translate(" + view.x.toFixed(2) + " " + view.y.toFixed(2) + ") scale(" + view.s.toFixed(3) + ")");
-      var r = (6 / view.s).toFixed(2);          // les points gardent la même taille à l'écran
-      pins.forEach(function (c) { c.setAttribute("r", c.classList.contains("active") ? String(r * 1.4) : r); });
-    };
-    var go = function (target) {
-      target = clampView(target);
-      if (anim) cancelAnimationFrame(anim);
-      if (reduced) { view = target; paint(); return; }
-      var from = { s: view.s, x: view.x, y: view.y }, t0 = performance.now(), dur = 380;
-      var step = function (now) {
-        var k = clamp((now - t0) / dur, 0, 1), e = 1 - Math.pow(1 - k, 3);
-        view = { s: from.s + (target.s - from.s) * e, x: from.x + (target.x - from.x) * e, y: from.y + (target.y - from.y) * e };
-        paint();
-        if (k < 1) anim = requestAnimationFrame(step); else anim = null;
+      // ctrl + molette (ou pincement du pavé tactile) pour zoomer sans bloquer le défilement de la page
+      civ.addEventListener("wheel", function (e) {
+        if (!e.ctrlKey && !e.metaKey) return;
+        e.preventDefault();
+        map.setZoomAround(map.mouseEventToContainerPoint(e), map.getZoom() + clamp(-e.deltaY, -40, 40) * 0.03, { animate: false });
+      }, { passive: false });
+
+      var groups = {}, markers = [];                       // une pastille par lieu (Abidjan 1 à 4 = un seul point)
+      rows.forEach(function (r) {
+        if (r.dataset.lat === "" || r.dataset.lon === "") return;
+        var key = r.dataset.lat + "," + r.dataset.lon;
+        (groups[key] = groups[key] || { lat: parseFloat(r.dataset.lat), lon: parseFloat(r.dataset.lon), rows: [] }).rows.push(r);
+      });
+      var style = { radius: 8, color: "#fff", weight: 2, fillColor: "#c9a24b", fillOpacity: 0.95, className: "drena-dot" };
+      var activeStyle = { radius: 11, fillColor: "#136b46", color: "#e7cf8e", weight: 3 };
+      var activeGroup = null;
+      var hideInfo = function () {
+        info.hidden = true;
+        markers.forEach(function (m) { m.setStyle(style); });
+        rows.forEach(function (r) { r.classList.remove("active"); });
+        activeGroup = null;
       };
-      anim = requestAnimationFrame(step);
-    };
-    var factor = function () { var b = civ.getBoundingClientRect(); return { k: W / b.width, left: b.left, top: b.top }; };
-    var zoomAt = function (cx, cy, ns, animate) {         // (cx, cy) en coordonnées de la carte
-      ns = clamp(ns, 1, MAXZ);
-      var px = (cx - view.x) / view.s, py = (cy - view.y) / view.s;
-      var target = { s: ns, x: cx - px * ns, y: cy - py * ns };
-      if (animate) go(target); else { view = clampView(target); paint(); }
-    };
-    var centre = function (px, py, ns) {                  // amène le point (px, py) au centre
-      go({ s: ns, x: W / 2 - px * ns, y: H / 2 - py * ns });
-    };
-
-    document.querySelectorAll(".map-tools button").forEach(function (b) {
-      b.addEventListener("click", function () {
-        var a = b.dataset.map;
-        if (a === "reset") { go({ s: 1, x: 0, y: 0 }); hideInfo(); }
-        else zoomAt(W / 2, H / 2, view.s * (a === "in" ? 1.6 : 1 / 1.6), true);
+      var showGroup = function (g, fly) {
+        clear(info);
+        var close = el("button", "close", "×"); close.type = "button"; close.setAttribute("aria-label", LABELS.close);
+        close.addEventListener("click", hideInfo); info.appendChild(close);
+        g.rows.forEach(function (r) {
+          info.appendChild(el("h3", "", r.dataset.drena));
+          if (r.dataset.region) info.appendChild(el("p", "muted", r.dataset.region));
+          if (r.dataset.delegue) info.appendChild(el("p", "", r.dataset.delegue));
+          if (r.dataset.tel) { var a = el("a", "", r.dataset.tel); a.href = "tel:" + r.dataset.tel.replace(/\s+/g, ""); a.dir = "ltr"; var p = el("p"); p.appendChild(a); info.appendChild(p); }
+        });
+        info.hidden = false;
+        markers.forEach(function (m) { m.setStyle(m._group === g ? activeStyle : style); if (m._group === g) m.bringToFront(); });
+        rows.forEach(function (r) { r.classList.toggle("active", g.rows.indexOf(r) !== -1); });
+        activeGroup = g;
+        if (fly) map.flyTo([g.lat, g.lon], Math.max(map.getZoom(), 9), { animate: !reduced, duration: 0.8 });
+      };
+      Object.keys(groups).forEach(function (k) {
+        var g = groups[k];
+        var m = L.circleMarker([g.lat, g.lon], style).addTo(map);
+        m._group = g; g.marker = m; markers.push(m);
+        var label = document.createElement("span");          // nœud DOM : jamais de HTML venant des données
+        label.textContent = g.rows.map(function (r) { return r.dataset.drena; }).join(" · ");
+        m.bindTooltip(label, { permanent: true, direction: "top", offset: [0, -8], className: "drena-label", interactive: false });
+        m.on("click", function () { showGroup(g, false); });
+        m.on("keypress", function (e) { if (e.originalEvent && (e.originalEvent.key === "Enter" || e.originalEvent.key === " ")) showGroup(g, true); });
       });
-    });
+      var showLabels = function () { civ.classList.toggle("show-labels", map.getZoom() >= 8); };
+      map.on("zoomend", showLabels); showLabels();
+      if (markers.length) map.fitBounds(L.featureGroup(markers).getBounds().pad(0.15));
 
-    // molette : seulement avec Ctrl / pincement du pavé tactile, pour ne pas bloquer le défilement de la page
-    civ.addEventListener("wheel", function (e) {
-      if (!e.ctrlKey && !e.metaKey) return;
-      e.preventDefault();
-      var f = factor();
-      zoomAt((e.clientX - f.left) * f.k, (e.clientY - f.top) * f.k, view.s * Math.exp(-clamp(e.deltaY, -40, 40) * 0.01), false);
-    }, { passive: false });
-    civ.addEventListener("dblclick", function (e) {
-      if (e.target.classList && e.target.classList.contains("pin")) return;
-      var f = factor();
-      zoomAt((e.clientX - f.left) * f.k, (e.clientY - f.top) * f.k, view.s * 1.8, true);
-    });
-
-    // glisser (souris ou doigt) et pincement (deux doigts)
-    var pts = {}, drag = null, pinch = null, moved = false;
-    civ.addEventListener("pointerdown", function (e) {
-      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
-      var ids = Object.keys(pts);
-      moved = false;
-      if (ids.length === 1) drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y };
-      else if (ids.length === 2) {
-        var a = pts[ids[0]], b = pts[ids[1]];
-        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: view.s }; drag = null;
-      }
-    });
-    civ.addEventListener("pointermove", function (e) {
-      if (!pts[e.pointerId]) return;
-      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
-      var ids = Object.keys(pts), f = factor();
-      if (ids.length >= 2 && pinch) {
-        var a = pts[ids[0]], b = pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
-        zoomAt(((a.x + b.x) / 2 - f.left) * f.k, ((a.y + b.y) / 2 - f.top) * f.k, pinch.s * d / pinch.d, false);
-        moved = true;
-      } else if (drag) {
-        var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-        if (!moved && Math.hypot(dx, dy) < 4) return;
-        if (!moved) { moved = true; civ.classList.add("dragging"); try { civ.setPointerCapture(e.pointerId); } catch (err) { /* ignoré */ } }
-        view = clampView({ s: view.s, x: drag.vx + dx * f.k, y: drag.vy + dy * f.k });
-        paint();
-      }
-    });
-    var release = function (e) {
-      delete pts[e.pointerId];
-      if (Object.keys(pts).length < 2) pinch = null;
-      if (!Object.keys(pts).length) { drag = null; civ.classList.remove("dragging"); }
-    };
-    civ.addEventListener("pointerup", release);
-    civ.addEventListener("pointercancel", release);
-    civ.addEventListener("lostpointercapture", release);
-
-    // clavier : flèches = déplacer, + / - = zoomer, 0 = recentrer
-    civ.addEventListener("keydown", function (e) {
-      if (e.target !== civ) return;
-      var step = 30, handled = true;
-      if (e.key === "ArrowLeft") go({ s: view.s, x: view.x + step, y: view.y });
-      else if (e.key === "ArrowRight") go({ s: view.s, x: view.x - step, y: view.y });
-      else if (e.key === "ArrowUp") go({ s: view.s, x: view.x, y: view.y + step });
-      else if (e.key === "ArrowDown") go({ s: view.s, x: view.x, y: view.y - step });
-      else if (e.key === "+" || e.key === "=") zoomAt(W / 2, H / 2, view.s * 1.6, true);
-      else if (e.key === "-") zoomAt(W / 2, H / 2, view.s / 1.6, true);
-      else if (e.key === "0") go({ s: 1, x: 0, y: 0 });
-      else handled = false;
-      if (handled) e.preventDefault();
-    });
-
-    // fiche d'un point : toutes les DRENA situées au même endroit (ex. Abidjan 1 à 4)
-    var hideInfo = function () {
-      info.hidden = true;
-      pins.forEach(function (c) { c.classList.remove("active"); });
-      rows.forEach(function (r) { r.classList.remove("active"); });
-      active = null; paint();
-    };
-    var showInfo = function (i, zoom) {
-      var row = rows[i];
-      if (!row || !row.dataset.x) return;
-      var x = row.dataset.x, y = row.dataset.y;
-      var same = rows.filter(function (r) { return r.dataset.x === x && r.dataset.y === y; });
-      clear(info);
-      var close = el("button", "close", "×"); close.type = "button"; close.setAttribute("aria-label", info.dataset.close || "×");
-      close.addEventListener("click", hideInfo); info.appendChild(close);
-      same.forEach(function (r) {
-        info.appendChild(el("h3", "", r.dataset.drena));
-        if (r.dataset.region) info.appendChild(el("p", "muted", r.dataset.region));
-        if (r.dataset.delegue) info.appendChild(el("p", "", r.dataset.delegue));
-        if (r.dataset.tel) { var a = el("a", "", r.dataset.tel); a.href = "tel:" + r.dataset.tel.replace(/\s+/g, ""); a.dir = "ltr"; var p = el("p"); p.appendChild(a); info.appendChild(p); }
+      rows.forEach(function (r) {
+        if (r.dataset.lat === "") return;
+        var open = function () {
+          var k = r.dataset.lat + "," + r.dataset.lon;
+          showGroup(groups[k], true);
+          civ.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+        };
+        r.addEventListener("click", function (e) { if (e.target.tagName !== "A") open(); });
+        r.addEventListener("keydown", function (e) { if (e.key === "Enter") open(); });
       });
-      info.hidden = false;
-      pins.forEach(function (c) { c.classList.toggle("active", c.getAttribute("cx") === x && c.getAttribute("cy") === y); });
-      rows.forEach(function (r) { r.classList.toggle("active", r.dataset.x === x && r.dataset.y === y); });
-      active = i; paint();
-      if (zoom) centre(parseFloat(x), parseFloat(y), Math.max(view.s, 3.2));
-    };
-    pins.forEach(function (c) {
-      c.addEventListener("click", function () { if (!moved) showInfo(parseInt(c.dataset.i, 10), false); });
-      c.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showInfo(parseInt(c.dataset.i, 10), true); } });
-    });
-    rows.forEach(function (r) {
-      if (!r.dataset.x) return;
-      var open = function () { showInfo(parseInt(r.dataset.i, 10), true); civ.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" }); };
-      r.addEventListener("click", function (e) { if (e.target.tagName !== "A") open(); });
-      r.addEventListener("keydown", function (e) { if (e.key === "Enter") open(); });
-    });
-    info.dataset.close = (LABELS.close || "×");
-    paint();
+      // la recherche estompe les pastilles qui ne correspondent pas
+      window.psieMapFilter = function (q, norm) {
+        markers.forEach(function (m) {
+          var hit = !q || m._group.rows.some(function (r) { return norm(r.dataset.q).indexOf(q) !== -1; });
+          m.setStyle({ opacity: hit ? 1 : 0.15, fillOpacity: hit ? 0.95 : 0.15 });
+          if (m.getTooltip() && m.getTooltip().getElement()) m.getTooltip().getElement().style.opacity = hit ? "" : "0.15";
+        });
+      };
+      map.on("click", function () { /* un clic sur le fond de carte ne ferme pas la fiche */ });
+    }
   }
 
   function fail() {

@@ -229,7 +229,7 @@ def test_filled_data_is_rendered(sandbox, tmp_path):
     assert "assets/docs/statuts.pdf" in parse(d / "documents.html").links
     home = (d / "index.html").read_text(encoding="utf-8")
     assert "AG le 15 décembre" in home and 'href="https://example.org/ag"' in home and "Le mot du Président" in home
-    assert "<circle" in (d / "regions.html").read_text(encoding="utf-8")
+    assert 'data-lat="7.69"' in (d / "regions.html").read_text(encoding="utf-8")
 
 
 def test_html_in_data_is_escaped(sandbox, tmp_path):
@@ -284,10 +284,27 @@ def test_interactive_map_markup(dist):
     page = parse(dist / "regions.html")
     ids = {d.get("id") for _, d in page.tags}
     assert {"civ-map", "civ-info", "region-search", "region-list"} <= ids
-    actions = [d.get("data-map") for t, d in page.tags if t == "button" and d.get("data-map")]
-    assert actions == ["in", "out", "reset"]
-    pins = [d for t, d in page.tags if t == "circle" and "pin" in (d.get("class") or "")]
-    assert len(pins) == 41 and all(p.get("role") == "button" and p.get("tabindex") == "0" and p.get("aria-label") for p in pins)
+    assert "assets/vendor/leaflet/leaflet.js" in page.links and "assets/vendor/leaflet/leaflet.css" in page.links
+    assert (dist / "assets" / "vendor" / "leaflet" / "leaflet.js").exists() and (dist / "assets" / "vendor" / "leaflet" / "LICENSE").exists()
+    rows = [d for t, d in page.tags if t == "li" and "data-lat" in d]
+    located = [d for d in rows if d["data-lat"] != ""]
+    assert len(rows) == 41 and len(located) == 41 and all(d.get("tabindex") == "0" for d in located)
+
+
+def test_map_tiles_are_allowed_only_on_the_map_page(dist):
+    def csp(name):
+        return htmllib.unescape(re.search(r'http-equiv="Content-Security-Policy" content="([^"]*)"', (dist / name).read_text(encoding="utf-8")).group(1))
+    assert "https://tile.openstreetmap.org" in csp("regions.html") and "https://tile.openstreetmap.org" in csp("ar/regions.html")
+    for other in ("index.html", "membres.html", "contact.html", "faitiere-lecim.html"):
+        assert "openstreetmap" not in csp(other), other
+    assert "script-src 'self';" in csp("regions.html")          # aucun script tiers : Leaflet est dans le site
+
+
+def test_region_coordinates_outside_the_country_are_refused(sandbox, tmp_path):
+    write_json(sandbox, "regions", [{"drena": "Erreur", "lat": 48.85, "lon": 2.35}])
+    with pytest.raises(SystemExit) as e:
+        site.build(tmp_path / "out")
+    assert "hors de la Côte d'Ivoire" in str(e.value)
 
 
 # ---------- actualités publiées dans le site ----------
