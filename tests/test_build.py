@@ -347,3 +347,67 @@ def test_invalid_news_is_refused(sandbox, tmp_path, item):
     with pytest.raises(SystemExit) as e:
         site.build(tmp_path / "out")
     assert "actualites.json" in str(e.value)
+
+
+# ---------- histoire, bureau, partenaires, glossaire, confidentialité, 404, réseaux ----------
+
+def test_new_informational_pages_exist_in_both_languages(dist):
+    for name in ("equipe", "partenaires", "glossaire", "confidentialite"):
+        assert (dist / f"{name}.html").exists() and (dist / "ar" / f"{name}.html").exists()
+    about = (dist / "apropos.html").read_text(encoding="utf-8")
+    assert about.count('class="dot"') == 4 and "3 septembre 2021" in about
+    gloss = (dist / "ar" / "glossaire.html").read_text(encoding="utf-8")
+    assert "DRENA" in gloss and "النصاب" in gloss
+
+
+def test_404_page_works_at_any_depth_and_stays_safe(tmp_path, monkeypatch):
+    monkeypatch.setenv("API_BASE", API)
+    monkeypatch.setenv("SITE_URL", "https://x.github.io/PSIE")
+    d = site.build(tmp_path / "d")
+    text = (d / "404.html").read_text(encoding="utf-8")
+    assert '<base href="https://x.github.io/PSIE/">' in text and "base-uri &#39;self&#39;" in text and "Page introuvable" in text
+    assert "ar/index.html" in text and "noindex" in text
+    other = (d / "index.html").read_text(encoding="utf-8")
+    assert "<base " not in other and "base-uri &#39;none&#39;" in other          # seule la 404 a besoin de <base>
+    monkeypatch.delenv("SITE_URL")
+    assert "<base " not in (site.build(tmp_path / "e") / "404.html").read_text(encoding="utf-8")
+
+
+def test_team_partners_whatsapp_and_social(sandbox, tmp_path):
+    (sandbox / "assets" / "equipe").mkdir(exist_ok=True)
+    write_json(sandbox, "equipe", [{"nom": "A. Diallo", "fonction": {"fr": "Directeur Exécutif National", "ar": "المدير"}, "organisation": "LECIM", "organe": "den"},
+                                   {"nom": "B. <b>X</b>", "fonction": "Administrateur", "organe": "ca"}])
+    write_json(sandbox, "partenaires", [{"nom": "Ministère", "type": "etat", "site_web": "https://example.org"}])
+    write_json(sandbox, "contact", {"whatsapp": "+225 07 07 83 63 73", "message": {"fr": "Bonjour & merci", "ar": "سلام"},
+                                    "facebook": "https://facebook.com/psie", "youtube": ""})
+    d = site.build(tmp_path / "out")
+    team = (d / "equipe.html").read_text(encoding="utf-8")
+    assert "Direction Exécutive Nationale" in team and "A. Diallo" in team and "B. &lt;b&gt;X&lt;/b&gt;" in team
+    assert team.index("Direction Exécutive Nationale") < team.index("Conseil d&#39;Administration")
+    assert 'href="https://wa.me/22507078363' in (d / "contact.html").read_text(encoding="utf-8")
+    assert "Bonjour%20%26%20merci" in (d / "contact.html").read_text(encoding="utf-8")
+    foot = (d / "index.html").read_text(encoding="utf-8")
+    assert "https://facebook.com/psie" in foot and "youtube.com" not in foot
+    assert "example.org" in (d / "partenaires.html").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("name,value", [
+    ("equipe", [{"nom": "X", "organe": "president"}]),
+    ("partenaires", [{"nom": "X", "type": "ami"}]),
+    ("contact", {"whatsapp": "abc"}),
+    ("contact", {"facebook": "javascript:alert(1)"}),
+])
+def test_invalid_team_partner_contact_data_is_refused(sandbox, tmp_path, name, value):
+    write_json(sandbox, name, value)
+    with pytest.raises(SystemExit):
+        site.build(tmp_path / "out")
+
+
+def test_privacy_and_legal_texts_follow_the_analytics_setting(sandbox, tmp_path, monkeypatch):
+    off = site.build(tmp_path / "a")
+    assert "n'utilise aucun outil de mesure d'audience" in (off / "confidentialite.html").read_text(encoding="utf-8").replace("&#39;", "'")
+    assert "GoatCounter" not in (off / "mentions.html").read_text(encoding="utf-8")
+    monkeypatch.setenv("GOATCOUNTER", "psie")
+    on = site.build(tmp_path / "b")
+    assert "GoatCounter" in (on / "confidentialite.html").read_text(encoding="utf-8") and "GoatCounter" in (on / "mentions.html").read_text(encoding="utf-8")
+    assert "OpenStreetMap" in (on / "confidentialite.html").read_text(encoding="utf-8")        # la carte est annoncée dans tous les cas

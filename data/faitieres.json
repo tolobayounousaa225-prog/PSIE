@@ -10,7 +10,7 @@
       "fr": "Mission : fédérer et encadrer les établissements islamiques privés en Côte d'Ivoire.\nRôle : défendre leurs intérêts, obtenir des agréments officiels, harmoniser les programmes et assurer la conformité avec les normes nationales.\nImpact : depuis 2011, l'État accompagne plus de 40 écoles islamiques grâce à l'action de l'OEECI.",
       "ar": "المهمة: جمع المؤسسات الإسلامية الخاصة في كوت ديفوار وتأطيرها.\nالدور: الدفاع عن مصالحها والحصول على الاعتمادات الرسمية وتوحيد البرامج وضمان المطابقة للمعايير الوطنية.\nالأثر: منذ سنة 2011، ترافق الدولة أكثر من 40 مدرسة إسلامية بفضل عمل المنظمة."
     },
-    "logo": "assets/faitieres/oeeci.png",
+    "logo": "assets/faitieres/oeeci.webp",
     "annee_creation": "",
     "nombre_ecoles": "",
     "telephone": "",
@@ -29,7 +29,7 @@
       "fr": "Mission : regrouper les écoles confessionnelles et les madrassas pour une éducation islamique de qualité, apolitique et moderne.\nGestion numérique des écoles : inscriptions, notes et bulletins.\nOrganisation des examens scolaires islamiques en partenariat avec le ministère.\nFormation continue des enseignants.\nCréée en 2012, la LECIM couvre 31 régions et compte plus de 430 écoles membres.",
       "ar": "المهمة: جمع المدارس الدينية والمدارس النموذجية من أجل تعليم إسلامي جيد وعصري وغير سياسي.\nالتسيير الرقمي للمدارس: التسجيلات والنقاط وكشوف الدرجات.\nتنظيم الامتحانات المدرسية الإسلامية بالشراكة مع الوزارة.\nالتكوين المستمر للمعلمين.\nتأسست الرابطة سنة 2012، وتغطي 31 جهة وتضم أكثر من 430 مدرسة عضوا."
     },
-    "logo": "assets/faitieres/lecim.png",
+    "logo": "assets/faitieres/lecim.webp",
     "annee_creation": "2012",
     "nombre_ecoles": "430+",
     "telephone": "",
@@ -67,7 +67,7 @@
       "fr": "Mission : encadrer les écoles confessionnelles affiliées au réseau Chérifla.\nRôle : organisation des examens islamiques (CEPE, BEPC, Baccalauréat islamique), mobilisation et sensibilisation des acteurs éducatifs.\nParticularité : dispose d'une plateforme numérique pour la gestion des examens et concours.\nImpact : plus de 26 000 candidats participent chaque année aux examens sous sa supervision.",
       "ar": "المهمة: تأطير المدارس الدينية المنتسبة إلى شبكة شريفلا.\nالدور: تنظيم الامتحانات الإسلامية (الشهادة الابتدائية وشهادة السلك الأول والباكالوريا الإسلامية) وتعبئة الفاعلين التربويين وتوعيتهم.\nالخصوصية: تتوفر على منصة رقمية لتدبير الامتحانات والمباريات.\nالأثر: يشارك سنويا أكثر من 26 000 مترشح في الامتحانات تحت إشرافها."
     },
-    "logo": "assets/faitieres/cherifla.png",
+    "logo": "assets/faitieres/cherifla.webp",
     "annee_creation": "",
     "nombre_ecoles": "",
     "telephone": "",
@@ -105,7 +105,7 @@
       "fr": "Mission : éduquer, soigner et servir les communautés musulmanes.\nÉducation : un réseau de 5 écoles confessionnelles islamiques, de la maternelle au lycée.\nSanté : 3 centres de santé communautaires, qui accueillent plus de 62 000 patients par an.\nValeurs : piété, intégrité, service communautaire, excellence académique et sanitaire.\nPrésence : dans 5 grandes régions de Côte d'Ivoire.",
       "ar": "المهمة: التربية والعلاج وخدمة الجاليات المسلمة.\nالتعليم: شبكة من 5 مدارس دينية إسلامية، من الروضة إلى الثانوية.\nالصحة: 3 مراكز صحية مجتمعية تستقبل أكثر من 62 000 مريض سنويا.\nالقيم: التقوى والنزاهة وخدمة المجتمع والتميز الدراسي والصحي.\nالحضور: في 5 جهات كبرى من كوت ديفوار."
     },
-    "logo": "assets/faitieres/hinneh.png",
+    "logo": "assets/faitieres/hinneh.webp",
     "annee_creation": "",
     "nombre_ecoles": "5",
     "telephone": "",

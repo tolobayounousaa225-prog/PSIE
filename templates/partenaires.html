@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.partners_title, t.partners_lead, t.nav_partners) }}
+<section class="section">
+  <div class="wrap">
+    {% if data.partenaires %}
+      {% for key in ['etat', 'technique', 'financier'] %}{% set items = data.partenaires|selectattr('type', 'equalto', key)|list %}{% if items %}
+      <div class="team-group">
+        <h2 data-reveal>{{ t.partner_types[key] }}</h2>
+        <div class="grid cols-3" data-stagger>
+          {% for p in items %}
+          <article class="card partner tilt" data-reveal>
+            {% if p.logo %}<img class="partner-logo" src="{{ root }}{{ p.logo }}" alt="{{ p.nom }}" loading="lazy">{% endif %}
+            <h3>{{ p.nom }}</h3>
+            {% if p.description[lang] or p.description.fr %}<p>{{ p.description[lang] or p.description.fr }}</p>{% endif %}
+            {% if p.site_web %}<a href="{{ p.site_web }}" rel="noopener noreferrer" target="_blank">{{ t.visit_site }}{{ icon('arrow', 'flip') }}</a>{% endif %}
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}{% endfor %}
+    {% else %}<p class="alert">{{ t.partners_empty }}</p>{% endif %}
+  </div>
+</section>
+{% endblock %}
