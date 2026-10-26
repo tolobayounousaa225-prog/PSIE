@@ -16,7 +16,7 @@
     "telephone": "",
     "email": "",
     "adresse": "",
-    "site_web": ""
+    "site_web": "http://examens-oeeci.ci"
   },
   {
     "slug": "lecim",
@@ -35,7 +35,7 @@
     "telephone": "",
     "email": "",
     "adresse": "",
-    "site_web": ""
+    "site_web": "lecim-ci.org"
   },
   {
     "slug": "iqra",
@@ -73,7 +73,7 @@
     "telephone": "",
     "email": "",
     "adresse": "",
-    "site_web": ""
+    "site_web": "https://www.deccherifla.ci"
   },
   {
     "slug": "al-hikma",
@@ -111,6 +111,6 @@
     "telephone": "",
     "email": "",
     "adresse": "",
-    "site_web": ""
+    "site_web": "https://hinneh-education.ci"
   }
 ]
