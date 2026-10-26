@@ -487,3 +487,14 @@ T["ar"].update({
     "fa_address": "العنوان", "fa_phone": "الهاتف", "fa_email": "البريد الإلكتروني", "fa_website": "الموقع الإلكتروني", "fa_back": "جميع الأعضاء",
     "fa_empty": "سيتم نشر تقديم هذه المنظمة قريبا.",
 })
+
+T["fr"].update({
+    "map_tools": "Commandes de la carte", "map_zoom_in": "Zoomer", "map_zoom_out": "Dézoomer", "map_reset": "Recentrer la carte",
+    "map_hint": "Glissez pour déplacer, Ctrl + molette ou deux doigts pour zoomer, cliquez sur un point pour voir la DRENA.",
+    "map_close": "Fermer", "map_here": "DRENA à cet endroit",
+})
+T["ar"].update({
+    "map_tools": "أدوات الخريطة", "map_zoom_in": "تكبير", "map_zoom_out": "تصغير", "map_reset": "إعادة توسيط الخريطة",
+    "map_hint": "اسحب للتحريك، Ctrl + عجلة الفأرة أو إصبعان للتكبير، انقر على نقطة لعرض المديرية.",
+    "map_close": "إغلاق", "map_here": "المديريات في هذا الموقع",
+})
