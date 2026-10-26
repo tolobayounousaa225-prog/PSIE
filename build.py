@@ -20,6 +20,7 @@ import shutil
 import sys
 from pathlib import Path
 
+import extras
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from content import PAGES, SITE_NAME, T
@@ -223,6 +224,25 @@ def build(dist: Path | None = None) -> Path:
     shutil.copytree(ROOT / "assets", dist / "assets")
     logo = next((n for n in LOGOS if (ROOT / "assets" / n).exists()), None)
 
+    # Fichiers générés : QR codes et plaquettes (toujours à jour avec les textes du site)
+    downloads = dist / "assets" / "dl"
+    downloads.mkdir(parents=True, exist_ok=True)
+    qr_items = []
+    logo_file = ROOT / "assets" / logo if logo and logo.lower().endswith((".png", ".jpg", ".jpeg")) else None
+    for lang in ("fr", "ar"):
+        url = f"{site_url}/{'ar/' if lang == 'ar' else ''}" if site_url else ""
+        if url:
+            (downloads / f"qr-psie-{lang}.svg").write_bytes(extras.qr_svg(url))
+            (downloads / f"qr-psie-{lang}.png").write_bytes(extras.qr_png(url))
+            qr_items.append({"lang": lang, "url": url, "org": SITE_NAME[lang], "heading": T[lang]["poster_heading"], "tag": T[lang]["footer_tag"]})
+        (downloads / f"plaquette-psie-{lang}.pdf").write_bytes(extras.brochure(T[lang], SITE_NAME[lang], lang, url, logo_file))
+    bars = []
+    for f in site_data["faitieres"]:
+        digits = re.match(r"\s*(\d[\d\s.,]*)", f["nombre_ecoles"] or "")
+        if digits and digits.group(1).replace(" ", "").replace(",", "").replace(".", "").isdigit():
+            bars.append({"sigle": f["sigle"], "text": f["nombre_ecoles"], "value": int(re.sub(r"\D", "", digits.group(1)))})
+    bars.sort(key=lambda b: -b["value"])
+
     env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=select_autoescape(["html"]))
 
     def render(lang, page, nav_key, in_sitemap, template, root, **extra):
@@ -238,7 +258,7 @@ def build(dist: Path | None = None) -> Path:
             "telephone": [t["phone1"], t["phone2"]],
         }, ensure_ascii=False).replace("</", "<\\/") if site_url else ""
         return env.get_template(template).render(
-            data=site_data, counter=counter, csp=csp_for(page, extra.get("base_href", "")),
+            data=site_data, counter=counter, csp=csp_for(page, extra.get("base_href", "")), qr=qr_items, bars=bars,
             t=t, lang=lang, dir="rtl" if lang == "ar" else "ltr", site_name=SITE_NAME[lang],
             page=page, nav_key=nav_key, nav=NAV, root=root, api_base=api_base, app_url=app_url, logo=logo,
             description=t.get(f"desc_{page}", t["desc_default"]), noindex=not in_sitemap,

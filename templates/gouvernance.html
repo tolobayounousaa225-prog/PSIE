@@ -4,30 +4,32 @@
 {{ page_hero(t.gov_title, t.gov_lead, t.nav_gov) }}
 <section class="section">
   <div class="wrap">
+    <p class="muted chart-hint" data-reveal>{{ t.chart_hint }}</p>
     <div class="chart" data-reveal>
-      <div class="node top"><div class="ico">{{ icon('users') }}</div><div><b>{{ t.chart_ag }}</b><small>{{ t.chart_ag_sub }}</small></div></div>
+      <div class="node top" data-organ="0"><div class="ico">{{ icon('users') }}</div><div><b>{{ t.chart_ag }}</b><small>{{ t.chart_ag_sub }}</small></div></div>
       <div class="vline"></div>
       <div class="chart-row">
-        <div class="node"><div class="ico">{{ icon('scale') }}</div><div><b>{{ t.chart_ca }}</b><small>{{ t.chart_ca_sub }}</small></div></div>
-        <div class="node"><div class="ico gold">{{ icon('flag') }}</div><div><b>{{ t.chart_den }}</b><small>{{ t.chart_den_sub }}</small></div></div>
-        <div class="node"><div class="ico">{{ icon('shield') }}</div><div><b>{{ t.chart_cc }}</b><small>{{ t.chart_cc_sub }}</small></div></div>
+        <div class="node" data-organ="1"><div class="ico">{{ icon('scale') }}</div><div><b>{{ t.chart_ca }}</b><small>{{ t.chart_ca_sub }}</small></div></div>
+        <div class="node" data-organ="2"><div class="ico gold">{{ icon('flag') }}</div><div><b>{{ t.chart_den }}</b><small>{{ t.chart_den_sub }}</small></div></div>
+        <div class="node" data-organ="3"><div class="ico">{{ icon('shield') }}</div><div><b>{{ t.chart_cc }}</b><small>{{ t.chart_cc_sub }}</small></div></div>
       </div>
       <div class="vline"></div>
       <div class="chart-row">
-        <div class="node"><div class="ico gold">{{ icon('book') }}</div><div><b>{{ t.chart_com }}</b><small>{{ t.chart_com_sub }}</small></div></div>
-        <div class="node"><div class="ico">{{ icon('pin') }}</div><div><b>{{ t.chart_reg }}</b><small>{{ t.chart_reg_sub }}</small></div></div>
+        <div class="node" data-target="commissions"><div class="ico gold">{{ icon('book') }}</div><div><b>{{ t.chart_com }}</b><small>{{ t.chart_com_sub }}</small></div></div>
+        <div class="node" data-target="regional"><div class="ico">{{ icon('pin') }}</div><div><b>{{ t.chart_reg }}</b><small>{{ t.chart_reg_sub }}</small></div></div>
       </div>
     </div>
+    <div class="organ-panel" id="organ-panel" aria-live="polite" hidden data-close="{{ t.chart_close }}"></div>
   </div>
 </section>
 
-<section class="section alt">
+<section class="section alt" id="organes">
   <div class="wrap">
     {{ section_head('', t.gov_title, '') }}
     <div class="grid cols-2" data-stagger>
       {% set icons = ['users', 'scale', 'flag', 'shield'] %}
       {% for o in t.organs %}
-      <article class="card tilt" data-reveal>
+      <article class="card tilt" data-reveal data-organ-card="{{ loop.index0 }}">
         <div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(icons[loop.index0]) }}</div>
         <span class="tag">{{ o.tag }}</span><h3>{{ o.name }}</h3>
         <ul>{% for p in o.points %}<li>{{ p }}</li>{% endfor %}</ul>
@@ -36,7 +38,7 @@
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="commissions">
   <div class="wrap">
     {{ section_head('', t.commissions_title, '') }}
     <div class="grid cols-2" data-stagger>
@@ -49,7 +51,7 @@
   </div>
 </section>
 
-<section class="section dark-band">
+<section class="section dark-band" id="regional">
   <div class="wrap grid cols-2">
     <div data-reveal="left"><span class="eyebrow">{{ t.nav_gov }}</span><h2>{{ t.regional_title }}</h2><p>{{ t.regional }}</p></div>
     <div data-reveal="right"><h2>{{ t.transparency_title }}</h2>

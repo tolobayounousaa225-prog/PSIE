@@ -205,6 +205,110 @@
     box.appendChild(el("div", "prose", pick(item.contenu)));
   }
 
+  // ---------- Questionnaire « Mon organisation peut-elle adhérer ? » ----------
+  var checker = document.querySelector(".checker");
+  if (checker) {
+    var questions = Array.prototype.map.call(checker.querySelectorAll(".checker-questions li"), function (li) { return li.textContent.trim(); });
+    var conditions = Array.prototype.map.call(checker.querySelectorAll(".checker-questions li"), function (li) { return li.dataset.condition; });
+    var prepare = Array.prototype.map.call(checker.querySelectorAll(".checker-prepare li"), function (li) { return li.textContent.trim(); });
+    var d = checker.dataset, stage = el("div", "checker-stage"), step = 0;
+    stage.setAttribute("aria-live", "polite");
+    checker.querySelector(".checker-questions").hidden = true;
+    checker.appendChild(stage);
+    var button = function (label, cls, onClick) { var b = el("button", "btn " + cls, label); b.type = "button"; b.addEventListener("click", onClick); return b; };
+    var show = function () {
+      clear(stage);
+      if (step === 0) {
+        var intro = el("div", "cta-row"); intro.appendChild(button(d.start, "dark", function () { step = 1; show(); })); stage.appendChild(intro); return;
+      }
+      var n = step, total = questions.length;
+      var meter = el("div", "meter"); var fill = el("span", "meter-fill"); fill.style.setProperty("--w", ((n - 1) / total * 100) + "%"); meter.appendChild(fill); stage.appendChild(meter);
+      stage.appendChild(el("p", "muted", d.progress.replace("{n}", String(n)).replace("{total}", String(total))));
+      stage.appendChild(el("h3", "", questions[n - 1]));
+      var row = el("div", "cta-row");
+      row.appendChild(button(d.yes, "dark", function () { if (n === total) { result(null); } else { step = n + 1; show(); } }));
+      row.appendChild(button(d.no, "outline", function () { result(conditions[n - 1]); }));
+      stage.appendChild(row);
+    };
+    var result = function (failed) {
+      clear(stage);
+      var box = el("div", "checker-result " + (failed ? "ko" : "ok"));
+      box.appendChild(el("h3", "", failed ? d.koTitle : d.okTitle));
+      if (failed) {
+        box.appendChild(el("p", "", d.koText)); box.appendChild(el("p", "strong", failed)); box.appendChild(el("p", "muted", d.koHelp));
+        var link = el("a", "btn outline", d.contact); link.href = "contact.html"; var r1 = el("div", "cta-row"); r1.appendChild(link); box.appendChild(r1);
+      } else {
+        box.appendChild(el("p", "", d.okText));
+        var list = el("ul", "check-list dark"); prepare.forEach(function (x) { list.appendChild(el("li", "", x)); }); box.appendChild(list);
+        if (d.joinHref) { var go = el("a", "btn", d.join); go.href = d.joinHref; var r2 = el("div", "cta-row"); r2.appendChild(go); box.appendChild(r2); }
+      }
+      var again = el("div", "cta-row"); again.appendChild(button(d.restart, "outline", function () { step = 1; show(); })); box.appendChild(again);
+      stage.appendChild(box);
+      var heading = box.querySelector("h3"); if (heading) { heading.setAttribute("tabindex", "-1"); heading.focus({ preventScroll: true }); }
+    };
+    show();
+  }
+
+  // ---------- Organigramme interactif ----------
+  var panel = document.getElementById("organ-panel");
+  if (panel) {
+    var nodes = Array.prototype.slice.call(document.querySelectorAll(".chart .node"));
+    var cards = {};
+    document.querySelectorAll("[data-organ-card]").forEach(function (c) { cards[c.dataset.organCard] = c; });
+    var closePanel = function () {
+      panel.hidden = true; clear(panel);
+      nodes.forEach(function (n) { n.classList.remove("on"); n.setAttribute("aria-expanded", "false"); });
+    };
+    var openOrgan = function (node) {
+      var key = node.dataset.organ, targetId = node.dataset.target;
+      if (key === undefined) {                               // commissions, représentations régionales : on descend vers la section
+        var target = document.getElementById(targetId);
+        if (target) target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+        return;
+      }
+      var card = cards[key];
+      if (!card) return;
+      var already = node.classList.contains("on");
+      closePanel();
+      if (already) return;
+      node.classList.add("on"); node.setAttribute("aria-expanded", "true");
+      var head = el("h3", "", card.querySelector("h3").textContent);
+      var close = el("button", "close", "×"); close.type = "button"; close.setAttribute("aria-label", panel.dataset.close); close.addEventListener("click", closePanel);
+      var list = el("ul"); card.querySelectorAll("li").forEach(function (li) { list.appendChild(el("li", "", li.textContent)); });
+      panel.appendChild(close); panel.appendChild(head); panel.appendChild(list); panel.hidden = false;
+    };
+    nodes.forEach(function (n) {
+      n.setAttribute("role", "button"); n.setAttribute("tabindex", "0"); n.setAttribute("aria-expanded", "false");
+      n.addEventListener("click", function () { openOrgan(n); });
+      n.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openOrgan(n); } });
+    });
+  }
+
+  // ---------- Graphique de répartition (barres animées) ----------
+  var bars = document.querySelector(".bars");
+  if (bars) {
+    var fillBars = function () {
+      bars.querySelectorAll("li").forEach(function (li, i) {
+        var pct = Math.max(3, Math.round(parseFloat(li.dataset.value) / parseFloat(li.dataset.max) * 100));
+        setTimeout(function () { li.querySelector(".bar-fill").style.setProperty("--w", pct + "%"); }, reduced ? 0 : i * 140);
+      });
+    };
+    if ("IntersectionObserver" in window && !reduced) {
+      var seen = new IntersectionObserver(function (entries) { if (entries[0].isIntersecting) { fillBars(); seen.disconnect(); } }, { threshold: 0.3 });
+      seen.observe(bars);
+    } else fillBars();
+  }
+
+  // ---------- Affiche : impression de la version choisie ----------
+  document.querySelectorAll("[data-print]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      body.dataset.print = b.dataset.print;
+      var done = function () { delete body.dataset.print; window.removeEventListener("afterprint", done); };
+      window.addEventListener("afterprint", done);
+      window.print();
+    });
+  });
+
   // ---------- Bandeau d'annonce (fermable pour la session) ----------
   var announce = document.querySelector(".announce");
   if (announce) {

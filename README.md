@@ -89,3 +89,20 @@ avec le nom du fichier et la ligne, et ne casse pas le site en ligne.
 1. Créer un compte gratuit sur [goatcounter.com](https://www.goatcounter.com) : le « code » choisi donne l'adresse `https://CODE.goatcounter.com`.
 2. Dans le dépôt : Settings → Secrets and variables → Actions → Variables → ajouter `GOATCOUNTER` = ce code.
 3. Relancer le workflow. Rien n'est collecté tant que la variable n'est pas définie ; aucun cookie, aucune donnée personnelle.
+
+
+## Fichiers générés automatiquement
+
+À chaque construction, le site produit sans intervention :
+- les **QR codes** du site en français et en arabe (SVG pour l'impression, PNG) : `assets/dl/qr-psie-fr.svg`, etc. Ils exigent `SITE_URL` (ou `CUSTOM_DOMAIN`) ;
+- une **plaquette PDF d'une page** en français et en arabe, construite à partir des textes du site : `assets/dl/plaquette-psie-fr.pdf` et `-ar.pdf`.
+
+Ces fichiers ne se modifient pas à la main : ils changent quand les textes du site changent. La page « Affiche et plaquette »
+les propose au téléchargement et imprime l'affiche. Les polices du PDF sont dans `tools/fonts/` (licence DejaVu incluse).
+Dépendances : `requirements.txt` (`fpdf2`, `uharfbuzz`, `qrcode`, `pillow`).
+
+## Pages interactives (sans serveur)
+
+- **Les statuts en 10 points** : résumé pédagogique des règles essentielles (textes dans `content.py`).
+- **Questionnaire d'adhésion** (page Adhérer) : construit à partir des conditions d'adhésion du site.
+- **Organigramme cliquable** (page Gouvernance) et **graphique de répartition** (page Nos membres, à partir de `nombre_ecoles` dans `data/faitieres.json`).

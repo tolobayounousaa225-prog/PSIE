@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.rules_title, t.rules_lead, t.nav_rules) }}
+<section class="section">
+  <div class="wrap">
+    <ol class="rules" data-stagger>
+      {% for r in t.rules %}
+      <li class="card rule tilt" data-reveal>
+        <span class="num" aria-hidden="true">{{ loop.index }}</span>
+        <div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(r.i) }}</div>
+        <h2>{{ r.t }}</h2>
+        <p>{{ r.d }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="muted rules-note" data-reveal>{{ t.rules_note }}</p>
+    <p class="cta-row" data-reveal><a class="btn outline" href="glossaire.html">{{ t.rules_cta }}</a>
+      <a class="btn dark" href="adhesion.html">{{ t.nav_join }}{{ icon('arrow', 'flip') }}</a></p>
+  </div>
+</section>
+{% endblock %}

@@ -23,6 +23,19 @@
     </article>
   </div>
 </section>
+<section class="section" id="eligibilite">
+  <div class="wrap">
+    {{ section_head('', t.elig_title, t.elig_lead) }}
+    <div class="checker card" data-reveal data-yes="{{ t.elig_yes }}" data-no="{{ t.elig_no }}" data-progress="{{ t.elig_progress }}"
+         data-restart="{{ t.elig_restart }}" data-start="{{ t.elig_start }}" data-ok-title="{{ t.elig_ok_title }}" data-ok-text="{{ t.elig_ok_text }}"
+         data-ko-title="{{ t.elig_ko_title }}" data-ko-text="{{ t.elig_ko_text }}" data-ko-help="{{ t.elig_ko_help }}"
+         data-contact="{{ t.elig_contact }}" data-join="{{ t.join_online }}" data-join-href="{{ (app_url ~ '/adhesion') if app_url else '' }}">
+      <ol class="checker-questions">{% for q in t.elig_questions %}<li data-condition="{{ t.elig_conditions[loop.index0] }}">{{ q }}</li>{% endfor %}</ol>
+      <ul class="checker-prepare" hidden>{% for p in t.elig_prepare %}<li>{{ p }}</li>{% endfor %}</ul>
+      <noscript><p class="muted">{{ t.no_js }}</p></noscript>
+    </div>
+  </div>
+</section>
 <section class="section alt">
   <div class="wrap">
     {{ section_head('', t.process_title, '') }}
