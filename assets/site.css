@@ -492,3 +492,16 @@ a.tile, a.badge-tile { color: inherit; text-decoration: none; display: block; }
   body[data-page="affiche"] .poster-actions { display: none !important; }
   body[data-page="affiche"] .poster h2 { font-size: 2.6rem; } body[data-page="affiche"] .poster-qr { width: 420px; height: 420px; }
 }
+
+/* ---------- Transparence, partenariat, guide ---------- */
+.filters { display: none; margin-bottom: 26px; gap: 12px; flex-direction: column; } .js .filters { display: flex; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: inherit; font: 700 .9rem var(--font); cursor: pointer; transition: background .2s, border-color .2s, transform .2s var(--ease); }
+.chip:hover { border-color: var(--gold-500); transform: translateY(-2px); } .chip:focus-visible { outline: 3px solid var(--gold-300); }
+.chip.on { background: var(--emerald-700); border-color: var(--emerald-700); color: #fff; }
+.year-group + .year-group { margin-top: 40px; } .year-group > h2 { margin-bottom: 18px; color: var(--emerald-700); }
+@media (prefers-color-scheme: dark) { .year-group > h2 { color: var(--emerald-300); } }
+.year-group[hidden], [data-kind][hidden] { display: none; }
+.timeline.three { grid-template-columns: repeat(3, 1fr); } .timeline.three::before { inset-inline: 12%; } .timeline.three::after { inset-inline-start: 12%; width: calc(76% * var(--progress, 0)); }
+@media (max-width: 800px) { .timeline.three { grid-template-columns: 1fr; } .timeline.three::before, .timeline.three::after { display: none; } }
+.center-block { max-width: 760px; margin-inline: auto; text-align: center; } .center-block .cta-row { justify-content: center; flex-wrap: wrap; }

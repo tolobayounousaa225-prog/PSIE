@@ -469,3 +469,67 @@ def test_size_chart_needs_two_numeric_values(sandbox, tmp_path):
     assert 'id="repartition"' in text and text.index("AAA") < text.index("BBB") and "CCC</span>" not in text.split('id="repartition"')[1].split("</section>")[0]
     write_json(sandbox, "faitieres", [{"slug": "aaa", "sigle": "AAA", "nombre_ecoles": "430+"}])
     assert 'id="repartition"' not in (site.build(tmp_path / "one") / "membres.html").read_text(encoding="utf-8")
+
+
+# ---------- centre de transparence, devenir partenaire, guide de l'espace membre ----------
+
+def test_transparency_partnership_and_guide_pages_exist(dist):
+    for name in ("transparence", "partenariat", "guide"):
+        assert (dist / f"{name}.html").exists() and (dist / "ar" / f"{name}.html").exists()
+    assert "Les premiers documents seront bientôt publiés" in (dist / "transparence.html").read_text(encoding="utf-8")
+    assert "partenariat.html" in parse(dist / "partenaires.html").links
+
+
+def test_transparency_documents_are_grouped_by_year_with_filters(sandbox, tmp_path):
+    (sandbox / "assets" / "transparence").mkdir(exist_ok=True)
+    for name in ("a", "b", "c"):
+        (sandbox / "assets" / "transparence" / f"{name}.pdf").write_bytes(b"%PDF-1.4 " + b"x" * 2048)
+    write_json(sandbox, "transparence", [
+        {"titre": {"fr": "Rapport <b>2026</b>", "ar": "تقرير"}, "categorie": "rapport_activite", "annee": 2026, "fichier": "assets/transparence/a.pdf"},
+        {"titre": "États 2025", "categorie": "etats_financiers", "annee": 2025, "fichier": "assets/transparence/b.pdf"},
+        {"titre": "PV 2025", "categorie": "proces_verbal", "annee": 2025, "fichier": "assets/transparence/c.pdf"},
+    ])
+    text = (site.build(tmp_path / "out") / "transparence.html").read_text(encoding="utf-8")
+    assert text.index("2026") < text.index("2025")                       # années récentes d'abord
+    assert text.count('data-filter="kind"') == 1 and text.count('data-filter="year"') == 1
+    assert 'data-kind="etats_financiers"' in text and "Rapport &lt;b&gt;2026" in text and "PDF · 2 Ko" in text
+    assert 'data-value="budget"' not in text                              # pas de filtre sur un type absent
+
+
+@pytest.mark.parametrize("item", [
+    {"titre": "x", "categorie": "inconnu", "annee": 2026, "fichier": "assets/transparence/a.pdf"},
+    {"titre": "x", "categorie": "budget", "annee": "2026", "fichier": "assets/transparence/a.pdf"},
+    {"titre": "x", "categorie": "budget", "annee": 1999, "fichier": "assets/transparence/a.pdf"},
+    {"titre": "x", "categorie": "budget", "annee": 2026, "fichier": "assets/logo.png"},
+    {"titre": "x", "categorie": "budget", "annee": 2026, "fichier": "assets/transparence/absent.pdf"},
+])
+def test_invalid_transparency_entries_are_refused(sandbox, tmp_path, item):
+    (sandbox / "assets" / "transparence").mkdir(exist_ok=True)
+    (sandbox / "assets" / "transparence" / "a.pdf").write_bytes(b"%PDF-1.4")
+    write_json(sandbox, "transparence", [item])
+    with pytest.raises(SystemExit) as e:
+        site.build(tmp_path / "out")
+    assert "transparence.json" in str(e.value)
+
+
+def test_partnership_whatsapp_uses_its_own_message(sandbox, tmp_path):
+    write_json(sandbox, "contact", {"whatsapp": "22507078363", "message": {"fr": "Salut général", "ar": "x"},
+                                    "message_partenariat": {"fr": "Partenariat svp", "ar": "شراكة"}})
+    d = site.build(tmp_path / "out")
+    part = (d / "partenariat.html").read_text(encoding="utf-8")
+    button = re.search(r'class="btn whatsapp" href="([^"]+)"', part).group(1)          # le bouton de la page, pas l'icône du pied de page
+    assert "Partenariat%20svp" in button and "Salut" not in button
+    contact_button = re.search(r'class="btn whatsapp" href="([^"]+)"', (d / "contact.html").read_text(encoding="utf-8")).group(1)
+    assert "Salut%20g" in contact_button
+    write_json(sandbox, "contact", {})
+    assert "wa.me" not in (site.build(tmp_path / "out2") / "partenariat.html").read_text(encoding="utf-8")
+
+
+def test_guide_shows_login_links_only_when_the_app_is_configured(tmp_path, monkeypatch):
+    monkeypatch.delenv("API_BASE", raising=False)
+    monkeypatch.delenv("APP_URL", raising=False)
+    off = (site.build(tmp_path / "a") / "guide.html").read_text(encoding="utf-8")
+    assert "ouvrira prochainement" in off and "/login" not in off
+    monkeypatch.setenv("APP_URL", "https://app.example.org")
+    on = (site.build(tmp_path / "b") / "guide.html").read_text(encoding="utf-8")
+    assert 'href="https://app.example.org/login"' in on and "ouvrira prochainement" not in on

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.transp_title, t.transp_lead, t.nav_transparency) }}
+<section class="section">
+  <div class="wrap">
+    {% if data.transparence %}
+    {% set kinds = data.transparence|map(attribute='categorie')|unique|list %}
+    {% set years = data.transparence|map(attribute='annee')|unique|list %}
+    <div class="filters" data-none="{{ t.transp_no_match }}">
+      <div class="chips" role="group" aria-label="{{ t.transp_filter_kind }}" data-filter="kind">
+        <button type="button" class="chip on" data-value="" aria-pressed="true">{{ t.transp_all }}</button>
+        {% for k in ['rapport_activite', 'etats_financiers', 'budget', 'proces_verbal', 'rapport_cc', 'autre'] if k in kinds %}
+        <button type="button" class="chip" data-value="{{ k }}" aria-pressed="false">{{ t.transp_kinds[k] }}</button>{% endfor %}
+      </div>
+      <div class="chips" role="group" aria-label="{{ t.transp_filter_year }}" data-filter="year">
+        <button type="button" class="chip on" data-value="" aria-pressed="true">{{ t.transp_all }}</button>
+        {% for y in years %}<button type="button" class="chip" data-value="{{ y }}" aria-pressed="false">{{ y }}</button>{% endfor %}
+      </div>
+    </div>
+    <div id="transp-list">
+      {% for y in years %}
+      <section class="year-group" data-year="{{ y }}">
+        <h2>{{ y }}</h2>
+        <div class="grid cols-2" data-stagger>
+          {% for d in data.transparence if d.annee == y %}
+          <article class="card doc" data-reveal data-kind="{{ d.categorie }}" data-year="{{ d.annee }}">
+            <div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon('file') }}</div>
+            <div>
+              <span class="eyebrow">{{ t.transp_kinds[d.categorie] }}</span>
+              <h3>{{ d.titre[lang] or d.titre.fr }}</h3>
+              {% if d.description[lang] or d.description.fr %}<p>{{ d.description[lang] or d.description.fr }}</p>{% endif %}
+              <p class="muted">PDF · {{ d.taille }}</p>
+              <a class="btn dark" href="{{ root }}{{ d.fichier }}" download>{{ t.download }}{{ icon('arrow', 'flip') }}</a>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% endfor %}
+      <p id="transp-none" class="alert" hidden>{{ t.transp_no_match }}</p>
+    </div>
+    {% else %}<p class="alert">{{ t.transp_empty }}</p>{% endif %}
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap grid cols-2">
+    <div data-reveal="left"><span class="eyebrow">{{ t.nav_transparency }}</span><h2>{{ t.transparency_title }}</h2><p>{{ t.transp_commit_lead }}</p>
+      <p class="cta-row"><a class="btn outline" href="statuts.html">{{ t.transp_more }}</a></p></div>
+    <div data-reveal="right"><ul class="check-list dark">{% for p in t.transparency %}<li>{{ icon('check') }}<span>{{ p }}</span></li>{% endfor %}</ul></div>
+  </div>
+</section>
+{% endblock %}

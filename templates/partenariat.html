@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.partner_title, t.partner_lead, t.nav_partnership) }}
+<section class="section">
+  <div class="wrap">
+    {{ section_head('', t.partner_why_title, '') }}
+    <div class="grid cols-3" data-stagger>
+      {% for w in t.partner_why %}<article class="card tilt" data-reveal><div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(w.i) }}</div><h3>{{ w.t }}</h3><p>{{ w.d }}</p></article>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section alt">
+  <div class="wrap">
+    {{ section_head('', t.partner_ways_title, '') }}
+    <div class="grid cols-2" data-stagger>
+      {% for w in t.partner_ways %}<article class="card tilt" data-reveal><div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(w.i) }}</div><h3>{{ w.t }}</h3><p>{{ w.d }}</p></article>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap">
+    {{ section_head('', t.partner_steps_title, '') }}
+    <div class="timeline three" data-stagger>
+      {% for s in t.partner_steps %}<div class="step" data-reveal><div class="bubble" aria-hidden="true"></div><div><h3>{{ s.t }}</h3><p>{{ s.d }}</p></div></div>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section dark-band">
+  <div class="wrap">
+    <div class="center-block" data-reveal>
+      <h2>{{ t.partner_title }}</h2>
+      <p>{{ t.partner_trust }}</p>
+      <p class="cta-row">
+        {% set wa = data.contact.whatsapp_partner_link[lang] if data.contact.whatsapp_partner_link else '' %}
+        {% if wa %}<a class="btn whatsapp" href="{{ wa }}" rel="noopener noreferrer" target="_blank">{{ icon('whatsapp') }}{{ t.whatsapp_cta }}</a>{% endif %}
+        <a class="btn" href="tel:{{ t.phone1|replace(' ', '') }}" dir="ltr">{{ icon('phone') }}{{ t.partner_cta_call }} · {{ t.phone1 }}</a>
+        <a class="btn ghost" href="partenaires.html">{{ t.partner_cta_see }}</a>
+        <a class="btn ghost" href="transparence.html">{{ t.partner_cta_transp }}</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}
