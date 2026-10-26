@@ -14,6 +14,7 @@ Usage :  python build.py
 
 import json
 import os
+from urllib.parse import quote
 import re
 import shutil
 import sys
@@ -93,10 +94,11 @@ def long_date(iso: str, lang: str) -> str:
 def load_site_data() -> dict:
     annonce = read_data("annonce", {})
     president = read_data("president", {})
-    documents, galerie, regions, faitieres, actualites = (
-        read_data(n, []) for n in ("documents", "galerie", "regions", "faitieres", "actualites"))
+    documents, galerie, regions, faitieres, actualites, equipe, partenaires = (
+        read_data(n, []) for n in ("documents", "galerie", "regions", "faitieres", "actualites", "equipe", "partenaires"))
+    contact = read_data("contact", {})
     for name, value in (("documents", documents), ("galerie", galerie), ("regions", regions), ("faitieres", faitieres),
-                        ("actualites", actualites)):
+                        ("actualites", actualites), ("equipe", equipe), ("partenaires", partenaires)):
         if not isinstance(value, list):
             sys.exit(f"data/{name}.json : une liste [ ... ] est attendue.")
 
@@ -106,8 +108,31 @@ def load_site_data() -> dict:
         "president": {"nom": str(president.get("nom", "")).strip(), "fonction": bi("president.fonction", president.get("fonction", "")),
                       "photo": asset_path("data/president.json (photo)", president.get("photo")),
                       "message": bi("president.message", president.get("message", ""))},
-        "documents": [], "galerie": [], "regions": [], "faitieres": [], "actualites": [],
+        "documents": [], "galerie": [], "regions": [], "faitieres": [], "actualites": [], "equipe": [], "partenaires": [],
+        "contact": {},
     }
+    for i, m in enumerate(equipe, 1):
+        organe = str(m.get("organe", "")).strip()
+        if organe not in ("den", "ca", "cc"):
+            sys.exit(f"data/equipe.json [{i}] : « organe » doit valoir den, ca ou cc (reçu : « {organe} »).")
+        out["equipe"].append({"nom": str(m.get("nom", "")).strip(), "fonction": bi(f"equipe[{i}].fonction", m.get("fonction", "")),
+                              "organisation": str(m.get("organisation", "")).strip(), "organe": organe,
+                              "photo": asset_path(f"data/equipe.json [{i}] (photo)", m.get("photo"))})
+    for i, pt in enumerate(partenaires, 1):
+        kind = str(pt.get("type", "")).strip()
+        if kind not in ("etat", "technique", "financier"):
+            sys.exit(f"data/partenaires.json [{i}] : « type » doit valoir etat, technique ou financier (reçu : « {kind} »).")
+        out["partenaires"].append({"nom": str(pt.get("nom", "")).strip(), "type": kind,
+                                   "logo": asset_path(f"data/partenaires.json [{i}] (logo)", pt.get("logo")),
+                                   "site_web": safe_link(f"data/partenaires.json [{i}] (site_web)", pt.get("site_web"), allow_http=True),
+                                   "description": bi(f"partenaires[{i}].description", pt.get("description", ""))})
+    wa = re.sub(r"[\s+().-]", "", str(contact.get("whatsapp", "")))
+    if wa and not re.fullmatch(r"\d{8,15}", wa):
+        sys.exit(f"data/contact.json : numéro WhatsApp invalide « {contact.get('whatsapp')} » (chiffres uniquement, avec l'indicatif, ex. 22507XXXXXXXX).")
+    msg = bi("contact.message", contact.get("message", ""))
+    out["contact"] = {"whatsapp_link": {l: f"https://wa.me/{wa}?text={quote(msg[l])}" for l in ("fr", "ar")} if wa else {},
+                      "social": [(k, safe_link(f"data/contact.json ({k})", contact.get(k))) for k in ("facebook", "youtube", "instagram")
+                                 if contact.get(k)]}
     seen_news = set()
     for i, n in enumerate(actualites, 1):
         slug, date = str(n.get("slug", "")).strip(), str(n.get("date", "")).strip()
@@ -183,13 +208,14 @@ def build(dist: Path | None = None) -> Path:
     site_data = load_site_data()
     pages = (list(PAGES) + [(f"faitiere-{f['slug']}", "nav_members", True) for f in site_data["faitieres"]]
              + [(f"actualite-{n['slug']}", "nav_news", True) for n in site_data["actualites"]])
-    def csp_for(page: str) -> str:
+    def csp_for(page: str, base_href: str = "") -> str:
         """Politique de sécurité : élargie seulement là où c'est nécessaire (fonds de carte, statistiques)."""
         img = ["'self'", "data:"] + (["https://tile.openstreetmap.org"] if page == "regions" else []) + ([f"https://{counter}.goatcounter.com"] if counter else [])
+        base_uri = "'self'" if base_href else "'none'"
         script = ["'self'"] + (["https://gc.zgo.at"] if counter else [])
         connect = [api_base or "'none'"] + ([f"https://{counter}.goatcounter.com"] if counter else [])
         return (f"default-src 'self'; script-src {' '.join(script)}; style-src 'self'; img-src {' '.join(img)}; "
-                f"connect-src {' '.join(connect)}; base-uri 'none'; form-action 'none'; object-src 'none'")
+                f"connect-src {' '.join(connect)}; base-uri {base_uri}; form-action 'none'; object-src 'none'")
 
     if dist.exists():
         shutil.rmtree(dist)
@@ -198,40 +224,41 @@ def build(dist: Path | None = None) -> Path:
     logo = next((n for n in LOGOS if (ROOT / "assets" / n).exists()), None)
 
     env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=select_autoescape(["html"]))
+
+    def render(lang, page, nav_key, in_sitemap, template, root, **extra):
+        t, other = T[lang], ("ar" if lang == "fr" else "fr")
+        alternates = []
+        if site_url and in_sitemap:
+            alternates = [("fr", page_url(site_url, "fr", page)), ("ar", page_url(site_url, "ar", page)),
+                          ("x-default", page_url(site_url, "fr", page))]
+        jsonld = json.dumps({
+            "@context": "https://schema.org", "@type": "Organization", "name": SITE_NAME[lang], "alternateName": "PSIE",
+            "url": site_url, "foundingDate": "2021-09-03",
+            "address": {"@type": "PostalAddress", "streetAddress": t["address"], "addressLocality": "Abidjan", "addressCountry": "CI"},
+            "telephone": [t["phone1"], t["phone2"]],
+        }, ensure_ascii=False).replace("</", "<\\/") if site_url else ""
+        return env.get_template(template).render(
+            data=site_data, counter=counter, csp=csp_for(page, extra.get("base_href", "")),
+            t=t, lang=lang, dir="rtl" if lang == "ar" else "ltr", site_name=SITE_NAME[lang],
+            page=page, nav_key=nav_key, nav=NAV, root=root, api_base=api_base, app_url=app_url, logo=logo,
+            description=t.get(f"desc_{page}", t["desc_default"]), noindex=not in_sitemap,
+            site_url=site_url, canonical=page_url(site_url, lang, page) if site_url and in_sitemap else "",
+            alternates=alternates, jsonld=jsonld,
+            other_href=("ar/index.html" if page == "404" else f"ar/{page}.html" if lang == "fr" else f"../{page}.html"), other_lang=other,
+            other_label=T[other]["lang_other"], **{"fa": None, "ne": None, **extra})
+
     for lang in ("fr", "ar"):
-        other = "ar" if lang == "fr" else "fr"
         base = "" if lang == "fr" else "../"
         for page, nav_key, in_sitemap in pages:
-            t = T[lang]
-            alternates = []
-            if site_url and in_sitemap:
-                alternates = [("fr", page_url(site_url, "fr", page)), ("ar", page_url(site_url, "ar", page)),
-                              ("x-default", page_url(site_url, "fr", page))]
-            jsonld = json.dumps({
-                "@context": "https://schema.org", "@type": "Organization", "name": SITE_NAME[lang], "alternateName": "PSIE",
-                "url": site_url, "foundingDate": "2021-09-03",
-                "address": {"@type": "PostalAddress", "streetAddress": t["address"], "addressLocality": "Abidjan",
-                            "addressCountry": "CI"},
-                "telephone": [t["phone1"], t["phone2"]],
-            }, ensure_ascii=False).replace("</", "<\\/") if site_url else ""
             fa = next((f for f in site_data["faitieres"] if page == f"faitiere-{f['slug']}"), None)
             ne = next((n for n in site_data["actualites"] if page == f"actualite-{n['slug']}"), None)
-            html = env.get_template("faitiere.html" if fa else "actualite_article.html" if ne else f"{page}.html").render(
-                data=site_data, fa=fa, ne=ne, csp=csp_for(page), counter=counter,
-                t=t, lang=lang, dir="rtl" if lang == "ar" else "ltr", site_name=SITE_NAME[lang],
-                page=page, nav_key=nav_key, nav=NAV, root=base, api_base=api_base, app_url=app_url, logo=logo,
-                description=t.get(f"desc_{page}", t["desc_default"]), noindex=not in_sitemap,
-                site_url=site_url, canonical=page_url(site_url, lang, page) if site_url and in_sitemap else "",
-                alternates=alternates, jsonld=jsonld,
-                other_href=(f"ar/{page}.html" if lang == "fr" else f"../{page}.html"), other_lang=other,
-                other_label=T[other]["lang_other"],
-            )
-            out = dist / ("ar" if lang == "ar" else "") / f"{page}.html"
-            out.write_text(html, encoding="utf-8")
+            html = render(lang, page, nav_key, in_sitemap, "faitiere.html" if fa else "actualite_article.html" if ne else f"{page}.html",
+                          base, fa=fa, ne=ne)
+            (dist / ("ar" if lang == "ar" else "") / f"{page}.html").write_text(html, encoding="utf-8")
 
+    # Page « introuvable » : GitHub Pages la sert à n'importe quelle profondeur d'adresse, d'où la balise <base>
     (dist / "404.html").write_text(
-        '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./">'
-        '<title>PSIE</title><a href="./">PSIE</a>', encoding="utf-8")
+        render("fr", "404", "nav_home", False, "404.html", "", base_href=f"{site_url}/" if site_url else ""), encoding="utf-8")
     if domain:
         (dist / "CNAME").write_text(domain + "\n", encoding="utf-8")
     (dist / ".nojekyll").write_text("", encoding="utf-8")

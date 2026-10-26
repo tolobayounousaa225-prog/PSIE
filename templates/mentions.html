@@ -4,7 +4,7 @@
 {{ page_hero(t.legal_title, '', t.nav_legal) }}
 <section class="section">
   <div class="wrap grid" data-stagger>
-    {% for block in t.legal %}<article class="card" data-reveal><h3>{{ block.t }}</h3>{% for p in block.p %}<p>{{ p }}</p>{% endfor %}</article>{% endfor %}
+    {% for block in t.legal %}{% set b = t.legal_cookies_on if (counter and loop.index == 3) else block %}<article class="card" data-reveal><h3>{{ b.t }}</h3>{% for p in b.p %}<p>{{ p }}</p>{% endfor %}</article>{% endfor %}
   </div>
 </section>
 {% endblock %}

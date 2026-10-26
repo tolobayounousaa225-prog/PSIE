@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.team_title, t.team_lead, t.nav_team) }}
+<section class="section">
+  <div class="wrap">
+    {% if data.equipe %}
+      {% for key in ['den', 'ca', 'cc'] %}{% set members = data.equipe|selectattr('organe', 'equalto', key)|list %}{% if members %}
+      <div class="team-group">
+        <h2 data-reveal>{{ t.team_groups[key] }}</h2>
+        <div class="team-grid" data-stagger>
+          {% for m in members %}
+          <article class="card person tilt" data-reveal>
+            {% if m.photo %}<img class="avatar" src="{{ root }}{{ m.photo }}" alt="{{ m.nom }}" width="120" height="120" loading="lazy">
+            {% else %}<span class="avatar ph" aria-hidden="true">{{ m.nom[:1] }}</span>{% endif %}
+            <h3>{{ m.nom }}</h3>
+            {% if m.fonction[lang] or m.fonction.fr %}<p class="role">{{ m.fonction[lang] or m.fonction.fr }}</p>{% endif %}
+            {% if m.organisation %}<p class="muted">{{ m.organisation }}</p>{% endif %}
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}{% endfor %}
+    {% else %}<p class="alert">{{ t.team_empty }}</p>{% endif %}
+  </div>
+</section>
+{% endblock %}

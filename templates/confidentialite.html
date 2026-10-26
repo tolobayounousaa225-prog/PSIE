@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.privacy_title, t.privacy_lead, t.nav_privacy) }}
+<section class="section">
+  <div class="wrap grid" data-stagger>
+    {% set stats = t.privacy_stats_on if counter else t.privacy_stats_off %}
+    {% for block in t.privacy %}<article class="card" data-reveal><h3>{{ block.t }}</h3>{% for p in block.p %}<p>{{ p }}</p>{% endfor %}</article>
+    {% if loop.index == 2 %}<article class="card" data-reveal><h3>{{ stats.t }}</h3>{% for p in stats.p %}<p>{{ p }}</p>{% endfor %}</article>{% endif %}{% endfor %}
+  </div>
+</section>
+{% endblock %}
