@@ -71,7 +71,7 @@
   <div class="wrap">
     {{ section_head(t.nav_members, t.founders_title, t.members_lead) }}
     <div class="badges" data-stagger>
-      {% for fa in data.faitieres %}<a class="badge-tile" href="faitiere-{{ fa.slug }}.html" data-reveal><div class="seal{% if fa.sigle|length > 6 %} long{% endif %}">{{ fa.sigle }}</div><div class="ct">{{ t.cat.fondateur }}</div></a>{% endfor %}
+      {% for fa in data.faitieres %}<a class="badge-tile" href="faitiere-{{ fa.slug }}.html" data-reveal>{% if fa.logo %}<img class="fa-seal" src="{{ root }}{{ fa.logo }}" alt="{{ fa.sigle }}" width="84" height="84" loading="lazy">{% else %}<div class="seal{% if fa.sigle|length > 6 %} long{% endif %}">{{ fa.sigle }}</div>{% endif %}<div class="ct">{{ t.cat.fondateur }}</div></a>{% endfor %}
     </div>
   </div>
 </section>
