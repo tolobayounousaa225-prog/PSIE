@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block title %}{{ fa.sigle }}{% endblock %}
+{% block content %}
+{{ page_hero(fa.sigle, fa.nom[lang], t.nav_members) }}
+<section class="section">
+  <div class="wrap grid cols-2">
+    <article class="card" data-reveal>
+      {% if fa.logo %}<img class="fa-logo" src="{{ root }}{{ fa.logo }}" alt="{{ fa.sigle }}" width="120" height="120" loading="lazy">{% endif %}
+      <h2>{{ t.fa_about }}</h2>
+      {% if fa.presentation[lang] %}{% for para in fa.presentation[lang].split('\n') if para.strip() %}<p>{{ para }}</p>{% endfor %}
+      {% else %}<p class="muted">{{ t.fa_empty }}</p>{% endif %}
+    </article>
+    <aside class="card" data-reveal>
+      <h2>{{ t.fa_facts }}</h2>
+      <dl class="facts">
+        <dt>{{ t.fa_status }}</dt><dd>{{ t.cat.fondateur }}</dd>
+        {% if fa.annee_creation %}<dt>{{ t.fa_founded }}</dt><dd>{{ fa.annee_creation }}</dd>{% endif %}
+        {% if fa.nombre_ecoles %}<dt>{{ t.fa_schools }}</dt><dd>{{ fa.nombre_ecoles }}</dd>{% endif %}
+        {% if fa.adresse %}<dt>{{ t.fa_address }}</dt><dd>{{ fa.adresse }}</dd>{% endif %}
+        {% if fa.telephone %}<dt>{{ t.fa_phone }}</dt><dd><a href="tel:{{ fa.telephone|replace(' ', '') }}" dir="ltr">{{ fa.telephone }}</a></dd>{% endif %}
+        {% if fa.email %}<dt>{{ t.fa_email }}</dt><dd><a href="mailto:{{ fa.email }}">{{ fa.email }}</a></dd>{% endif %}
+        {% if fa.site_web %}<dt>{{ t.fa_website }}</dt><dd><a href="{{ fa.site_web }}" rel="noopener noreferrer" target="_blank">{{ fa.site_web }}</a></dd>{% endif %}
+      </dl>
+    </aside>
+  </div>
+  <div class="wrap"><p class="cta-row"><a class="btn outline" href="membres.html">{{ t.fa_back }}</a></p></div>
+</section>
+{% endblock %}

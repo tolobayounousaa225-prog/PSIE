@@ -5,7 +5,7 @@
 <section class="section">
   <div class="wrap">
     <div id="membres-list" class="tiles" aria-live="polite">
-      {% for f in t.founders %}<div class="tile"><div class="num{% if f|length > 6 %} long{% endif %}">{{ f }}</div><div class="muted">{{ t.cat.fondateur }}</div></div>{% endfor %}
+      {% for fa in data.faitieres %}<a class="tile" href="faitiere-{{ fa.slug }}.html"><div class="num{% if fa.sigle|length > 6 %} long{% endif %}">{{ fa.sigle }}</div><div class="muted">{{ t.cat.fondateur }}</div></a>{% endfor %}
     </div>
     <p id="members-note" class="alert" hidden>{{ t.members_note }}</p>
     <p id="fallback" class="alert" hidden>{{ t.unavailable }}</p>

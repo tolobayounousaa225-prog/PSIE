@@ -125,8 +125,11 @@
   function renderMembers(data) {
     var box = document.getElementById("membres-list");
     if (!box || !data.membres.length) return;
-    clear(box);
+    // les fiches des faîtières (liens) restent affichées ; on ajoute seulement les membres inconnus de la liste statique
+    var known = {};
+    box.querySelectorAll(".num").forEach(function (n) { known[n.textContent.trim().toUpperCase()] = true; });
     data.membres.forEach(function (m, i) {
+      if (known[String(m.sigle).trim().toUpperCase()]) return;
       var tile = el("div", "tile");
       tile.setAttribute("data-reveal", "");
       tile.style.setProperty("--i", String(i % 6));
@@ -136,6 +139,13 @@
       box.appendChild(tile);
       requestAnimationFrame(function () { tile.classList.add("in"); });
     });
+  }
+
+  // Chiffre « organisations fondatrices » lu sur l'application (valeur validée : entier raisonnable)
+  function renderLiveStats(data) {
+    var n = data.membres.filter(function (m) { return m.categorie === "fondateur"; }).length;
+    var first = document.querySelector(".stat .num");
+    if (first && Number.isInteger(n) && n > 0 && n < 1000) { first.dataset.count = String(n); first.textContent = String(n); }
   }
 
   function newsCard(n, short) {
@@ -193,6 +203,63 @@
     box.appendChild(el("div", "prose", pick(item.contenu)));
   }
 
+  // ---------- Bandeau d'annonce (fermable pour la session) ----------
+  var announce = document.querySelector(".announce");
+  if (announce) {
+    var stored = null;
+    try { stored = sessionStorage.getItem("psie-annonce"); } catch (e) { /* stockage indisponible : on affiche */ }
+    var text = announce.textContent.trim();
+    if (stored !== text) {
+      announce.hidden = false;
+      body.classList.add("has-announce");
+      announce.querySelector(".announce-close").addEventListener("click", function () {
+        announce.hidden = true;
+        body.classList.remove("has-announce");
+        try { sessionStorage.setItem("psie-annonce", text); } catch (e) { /* ignoré */ }
+      });
+    }
+  }
+
+  // ---------- Galerie : visionneuse ----------
+  var lightbox = document.querySelector(".lightbox");
+  if (lightbox) {
+    var lbImg = lightbox.querySelector("img"), lbCap = lightbox.querySelector("figcaption");
+    var shots = Array.prototype.slice.call(document.querySelectorAll(".shot")), current = -1, opener = null;
+    var show = function (i) {
+      current = (i + shots.length) % shots.length;
+      lbImg.src = shots[current].dataset.full;
+      lbImg.alt = shots[current].dataset.caption || "";
+      lbCap.textContent = shots[current].dataset.caption || "";
+    };
+    var close = function () { lightbox.hidden = true; document.body.classList.remove("no-scroll"); if (opener) opener.focus(); };
+    shots.forEach(function (b, i) {
+      b.addEventListener("click", function () { opener = b; show(i); lightbox.hidden = false; document.body.classList.add("no-scroll"); lightbox.querySelector(".lb-close").focus(); });
+    });
+    lightbox.querySelector(".lb-close").addEventListener("click", close);
+    lightbox.addEventListener("click", function (e) { if (e.target === lightbox) close(); });
+    document.addEventListener("keydown", function (e) {
+      if (lightbox.hidden) return;
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowRight") show(current + (lang === "ar" ? -1 : 1));
+      else if (e.key === "ArrowLeft") show(current + (lang === "ar" ? 1 : -1));
+    });
+  }
+
+  // ---------- Représentations régionales : recherche ----------
+  var search = document.getElementById("region-search");
+  if (search) {
+    var items = Array.prototype.slice.call(document.querySelectorAll("#region-list li"));
+    var count = document.getElementById("region-count");
+    var tpl = count.dataset.template;
+    var norm = function (v) { return v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); };
+    search.addEventListener("input", function () {
+      var q = norm(search.value.trim()), n = 0;
+      items.forEach(function (li) { var ok = !q || norm(li.dataset.q).indexOf(q) !== -1; li.hidden = !ok; if (ok) n++; });
+      count.textContent = tpl.replace("{n}", String(n));
+      document.querySelectorAll(".civ-map .pin").forEach(function (c) { c.classList.toggle("dim", !!q && norm(c.dataset.name).indexOf(q) === -1); });
+    });
+  }
+
   function fail() {
     document.querySelectorAll(".js-loading, .skeleton").forEach(function (n) { n.remove(); });
     if (page === "index") { var s = document.getElementById("home-news-section"); if (s) s.hidden = true; return; }
@@ -210,7 +277,7 @@
     .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(function (data) {
       if (!data || !Array.isArray(data.membres) || !Array.isArray(data.actualites)) throw new Error("format");
-      if (page === "index") renderHomeNews(data);
+      if (page === "index") { renderHomeNews(data); renderLiveStats(data); }
       else if (page === "membres") renderMembers(data);
       else if (page === "actualites") renderNewsList(data);
       else renderNewsItem(data);

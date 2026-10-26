@@ -27,6 +27,7 @@ Application ──►  Serveur Hostinger  (connexion, adhésion, suivi, QR codes
    | `API_BASE` | adresse de l'application, ex. `https://app.exemple.org` | dès que le serveur est en ligne |
    | `APP_URL` | idem (laisser vide si identique à `API_BASE`) | facultatif |
    | `CUSTOM_DOMAIN` | ex. `psie-ci.org` | quand le nom de domaine est choisi |
+   | `GOATCOUNTER` | ex. `psie` | facultatif : code de votre compte GoatCounter (statistiques de visite sans cookies, voir ci-dessous) |
    | `SITE_URL` | ex. `https://psie-ci.org` | facultatif : adresse publique (sitemap, SEO). Par défaut : l'adresse GitHub Pages |
 
    Tant qu'elles ne sont pas définies, le site se publie quand même : les boutons « Adhérer » et
@@ -74,3 +75,17 @@ python -m http.server 8000 --directory dist        # http://localhost:8000
 - Les requêtes vers l'application sont faites **sans cookie** (`credentials: "omit"`).
 - Les adresses saisies dans les variables sont vérifiées (une valeur piégée fait échouer la construction).
 - Aucun secret n'est stocké dans ce dépôt public.
+
+
+## Contenu modifiable sans programmer (dossier `data/`)
+
+Annonce en bas d'écran, mot du Président, documents à télécharger, galerie, représentations régionales (DRENA, avec carte)
+et fiches des faîtières se modifient dans les fichiers `.json` du dossier [`data/`](data/LISEZ-MOI.md) : bouton crayon sur GitHub,
+enregistrer, le site se met à jour en 1 à 2 minutes. Une erreur d'écriture est signalée par le contrôle automatique
+avec le nom du fichier et la ligne, et ne casse pas le site en ligne.
+
+## Statistiques de visite (facultatif, sans cookies)
+
+1. Créer un compte gratuit sur [goatcounter.com](https://www.goatcounter.com) : le « code » choisi donne l'adresse `https://CODE.goatcounter.com`.
+2. Dans le dépôt : Settings → Secrets and variables → Actions → Variables → ajouter `GOATCOUNTER` = ce code.
+3. Relancer le workflow. Rien n'est collecté tant que la variable n'est pas définie ; aucun cookie, aucune donnée personnelle.
