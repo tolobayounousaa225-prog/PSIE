@@ -31,6 +31,7 @@ SITE_URL_RE = re.compile(r"^https?://[A-Za-z0-9.-]+(:\d{1,5})?(/[A-Za-z0-9._~-]+
 DOMAIN_RE = re.compile(r"^(?=.{4,253}$)([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$")
 LOGOS = ("logo.svg", "logo.png", "logo.webp")
 DATA = ROOT / "data"
+TRANSPARENCE_KINDS = ("rapport_activite", "etats_financiers", "budget", "proces_verbal", "rapport_cc", "autre")
 ASSET_RE = re.compile(r"^assets/[A-Za-z0-9._/-]+\.(jpg|jpeg|png|webp|svg|pdf)$", re.I)
 LINK_RE = re.compile(r"^https://[^\s\"'<>]+$")
 SITE_RE = re.compile(r"^https?://[^\s\"'<>]+$")   # sites externes des faîtières : certains n'ont pas encore de https
@@ -95,11 +96,11 @@ def long_date(iso: str, lang: str) -> str:
 def load_site_data() -> dict:
     annonce = read_data("annonce", {})
     president = read_data("president", {})
-    documents, galerie, regions, faitieres, actualites, equipe, partenaires = (
-        read_data(n, []) for n in ("documents", "galerie", "regions", "faitieres", "actualites", "equipe", "partenaires"))
+    documents, galerie, regions, faitieres, actualites, equipe, partenaires, transparence = (
+        read_data(n, []) for n in ("documents", "galerie", "regions", "faitieres", "actualites", "equipe", "partenaires", "transparence"))
     contact = read_data("contact", {})
     for name, value in (("documents", documents), ("galerie", galerie), ("regions", regions), ("faitieres", faitieres),
-                        ("actualites", actualites), ("equipe", equipe), ("partenaires", partenaires)):
+                        ("actualites", actualites), ("equipe", equipe), ("partenaires", partenaires), ("transparence", transparence)):
         if not isinstance(value, list):
             sys.exit(f"data/{name}.json : une liste [ ... ] est attendue.")
 
@@ -109,7 +110,7 @@ def load_site_data() -> dict:
         "president": {"nom": str(president.get("nom", "")).strip(), "fonction": bi("president.fonction", president.get("fonction", "")),
                       "photo": asset_path("data/president.json (photo)", president.get("photo")),
                       "message": bi("president.message", president.get("message", ""))},
-        "documents": [], "galerie": [], "regions": [], "faitieres": [], "actualites": [], "equipe": [], "partenaires": [],
+        "documents": [], "galerie": [], "regions": [], "faitieres": [], "actualites": [], "equipe": [], "partenaires": [], "transparence": [],
         "contact": {},
     }
     for i, m in enumerate(equipe, 1):
@@ -127,11 +128,28 @@ def load_site_data() -> dict:
                                    "logo": asset_path(f"data/partenaires.json [{i}] (logo)", pt.get("logo")),
                                    "site_web": safe_link(f"data/partenaires.json [{i}] (site_web)", pt.get("site_web"), allow_http=True),
                                    "description": bi(f"partenaires[{i}].description", pt.get("description", ""))})
+    for i, d in enumerate(transparence, 1):
+        kind = str(d.get("categorie", "autre")).strip() or "autre"
+        if kind not in TRANSPARENCE_KINDS:
+            sys.exit(f"data/transparence.json [{i}] : « categorie » doit valoir {', '.join(TRANSPARENCE_KINDS)} (reçu : « {kind} »).")
+        year = d.get("annee")
+        if isinstance(year, bool) or not isinstance(year, int) or not 2000 <= year <= 2100:
+            sys.exit(f"data/transparence.json [{i}] : « annee » doit être un nombre entre 2000 et 2100 (reçu : « {year} »).")
+        path = asset_path(f"data/transparence.json [{i}] (fichier)", d.get("fichier"))
+        if not path or not path.lower().endswith(".pdf"):
+            sys.exit(f"data/transparence.json [{i}] : « fichier » doit être un PDF placé dans assets/ (reçu : « {d.get('fichier')} »).")
+        size = (ROOT / path).stat().st_size
+        out["transparence"].append({"titre": bi(f"transparence[{i}].titre", d.get("titre", "")), "description": bi(f"transparence[{i}].description", d.get("description", "")),
+                                    "categorie": kind, "annee": year, "fichier": path,
+                                    "taille": f"{size / 1048576:.1f} Mo".replace(".", ",") if size >= 1048576 else f"{max(1, round(size / 1024))} Ko"})
+    out["transparence"].sort(key=lambda d: (-d["annee"], d["categorie"], d["titre"]["fr"]))
     wa = re.sub(r"[\s+().-]", "", str(contact.get("whatsapp", "")))
     if wa and not re.fullmatch(r"\d{8,15}", wa):
         sys.exit(f"data/contact.json : numéro WhatsApp invalide « {contact.get('whatsapp')} » (chiffres uniquement, avec l'indicatif, ex. 22507XXXXXXXX).")
     msg = bi("contact.message", contact.get("message", ""))
-    out["contact"] = {"whatsapp_link": {l: f"https://wa.me/{wa}?text={quote(msg[l])}" for l in ("fr", "ar")} if wa else {},
+    msg_partner = bi("contact.message_partenariat", contact.get("message_partenariat", "")) if contact.get("message_partenariat") else msg
+    out["contact"] = {"whatsapp_partner_link": {l: f"https://wa.me/{wa}?text={quote(msg_partner[l])}" for l in ("fr", "ar")} if wa else {},
+                      "whatsapp_link": {l: f"https://wa.me/{wa}?text={quote(msg[l])}" for l in ("fr", "ar")} if wa else {},
                       "social": [(k, safe_link(f"data/contact.json ({k})", contact.get(k))) for k in ("facebook", "youtube", "instagram")
                                  if contact.get(k)]}
     seen_news = set()
