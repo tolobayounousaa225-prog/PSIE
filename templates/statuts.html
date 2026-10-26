@@ -2,7 +2,7 @@
 {% from "_macros.html" import icon, page_hero, section_head with context %}
 {% block content %}
 {{ page_hero(t.rules_title, t.rules_lead, t.nav_rules) }}
-<section class="section">
+<section class="section" data-toc="h2" data-toc-label="{{ t.toc }}">
   <div class="wrap">
     <ol class="rules" data-stagger>
       {% for r in t.rules %}

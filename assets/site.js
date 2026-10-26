@@ -506,3 +506,52 @@
     .catch(fail)
     .then(function () { clearTimeout(timer); });
 })();
+
+// Sommaire flottant des pages longues : <main data-toc="h2|summary" data-toc-label="…">
+(function () {
+  "use strict";
+  var host = document.querySelector("[data-toc]");
+  if (!host) return;
+  var items = Array.prototype.slice.call(host.querySelectorAll(host.dataset.toc === "summary" ? "summary" : "h2"));
+  if (items.length < 3) return;
+  var label = host.dataset.tocLabel || "";
+  var nav = document.createElement("nav");
+  nav.className = "toc";
+  nav.setAttribute("aria-label", label);
+  var btn = document.createElement("button");
+  btn.type = "button"; btn.className = "toc-btn"; btn.setAttribute("aria-expanded", "false");
+  btn.textContent = label;
+  var list = document.createElement("ol");
+  list.className = "toc-list"; list.hidden = true;
+  var links = [];
+  items.forEach(function (el, i) {
+    var target = el.tagName === "SUMMARY" ? el.parentNode : el;
+    if (!target.id) target.id = "toc-" + (i + 1);
+    var li = document.createElement("li"), a = document.createElement("a");
+    a.href = "#" + target.id;
+    a.textContent = (el.textContent || "").trim();
+    a.addEventListener("click", function () {
+      if (target.tagName === "DETAILS") target.open = true;
+      list.hidden = true; btn.setAttribute("aria-expanded", "false");
+    });
+    li.appendChild(a); list.appendChild(li); links.push({ a: a, el: target });
+  });
+  btn.addEventListener("click", function () {
+    var open = list.hidden;
+    list.hidden = !open; btn.setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !list.hidden) { list.hidden = true; btn.setAttribute("aria-expanded", "false"); btn.focus(); }
+  });
+  nav.appendChild(list); nav.appendChild(btn);
+  document.body.appendChild(nav);
+  function update() {
+    var y = window.scrollY, shown = y > 380, current = null;
+    nav.classList.toggle("show", shown);
+    if (!shown && !list.hidden) { list.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+    links.forEach(function (l) { if (l.el.getBoundingClientRect().top < window.innerHeight * 0.4) current = l; });
+    links.forEach(function (l) { if (l === current) l.a.setAttribute("aria-current", "true"); else l.a.removeAttribute("aria-current"); });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  update();
+})();

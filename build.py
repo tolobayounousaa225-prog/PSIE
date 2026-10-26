@@ -261,6 +261,19 @@ def build(dist: Path | None = None) -> Path:
             bars.append({"sigle": f["sigle"], "text": f["nombre_ecoles"], "value": int(re.sub(r"\D", "", digits.group(1)))})
     bars.sort(key=lambda b: -b["value"])
 
+    # Chiffres clés de l'accueil : recalculés à partir des fichiers de données
+    stats = {}
+    for lang in ("fr", "ar"):
+        st = [dict(x) for x in T[lang]["stats"]]
+        if site_data["faitieres"]:
+            st[0]["value"] = len(site_data["faitieres"])
+        if site_data["regions"]:
+            st[3]["value"] = len(site_data["regions"])
+        if bars:
+            st.append({"value": sum(b["value"] for b in bars),
+                       "label": T[lang]["stat_schools"].format(n=len(bars), m=len(site_data["faitieres"]))})
+        stats[lang] = st
+
     env = Environment(loader=FileSystemLoader(ROOT / "templates"), autoescape=select_autoescape(["html"]))
 
     def render(lang, page, nav_key, in_sitemap, template, root, **extra):
@@ -275,7 +288,26 @@ def build(dist: Path | None = None) -> Path:
             "address": {"@type": "PostalAddress", "streetAddress": t["address"], "addressLocality": "Abidjan", "addressCountry": "CI"},
             "telephone": [t["phone1"], t["phone2"]],
         }, ensure_ascii=False).replace("</", "<\\/") if site_url else ""
+        fa_, ne_ = extra.get("fa"), extra.get("ne")
+        if page == "index":
+            og_title = SITE_NAME[lang]
+        elif fa_:
+            og_title = fa_["nom"][lang] or fa_["sigle"]
+        elif ne_:
+            og_title = ne_["titre"][lang]
+        else:
+            og_title = t[nav_key]
+        og_image = ""
+        if site_url and in_sitemap:               # aperçu de lien : image 1200×630 propre à la page et à la langue
+            card = extras.og_card(og_title, SITE_NAME[lang], lang, logo_file)
+            if card:
+                (dist / "assets" / "og").mkdir(exist_ok=True)
+                (dist / "assets" / "og" / f"{lang}-{page}.jpg").write_bytes(card)
+                og_image = f"{site_url}/assets/og/{lang}-{page}.jpg"
+            elif logo:
+                og_image = f"{site_url}/assets/{logo}"
         return env.get_template(template).render(
+            og_title=og_title, og_image=og_image, stats=stats[lang],
             data=site_data, counter=counter, csp=csp_for(page, extra.get("base_href", "")), qr=qr_items, bars=bars,
             t=t, lang=lang, dir="rtl" if lang == "ar" else "ltr", site_name=SITE_NAME[lang],
             page=page, nav_key=nav_key, nav=NAV, root=root, api_base=api_base, app_url=app_url, logo=logo,

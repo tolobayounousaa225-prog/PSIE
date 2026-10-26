@@ -2,7 +2,7 @@
 {% from "_macros.html" import icon, page_hero, section_head with context %}
 {% block content %}
 {{ page_hero(t.faq_title, '', t.nav_faq) }}
-<section class="section">
+<section class="section" data-toc="summary" data-toc-label="{{ t.toc }}">
   <div class="wrap faq" data-stagger>
     {% for item in t.faq %}<details data-reveal><summary><span>{{ item.q }}</span>{{ icon('chevron') }}</summary><div class="ans">{{ item.a }}</div></details>{% endfor %}
   </div>
