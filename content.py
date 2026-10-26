@@ -638,3 +638,6 @@ T["ar"].update({
 
 T["fr"]["legal_cookies_on"] = {"t": "Cookies et mesure d'audience", "p": ["Ce site ne dépose aucun cookie. Il mesure son audience avec GoatCounter, un outil sans cookie qui ne vous identifie pas (voir la page Confidentialité)."]}
 T["ar"]["legal_cookies_on"] = {"t": "ملفات تعريف الارتباط وقياس الزيارات", "p": ["لا يضع هذا الموقع أي ملف تعريف ارتباط. ويقيس زياراته عبر GoatCounter، وهي أداة بلا ملفات ارتباط لا تحدد هويتكم (انظر صفحة الخصوصية)."]}
+
+T["fr"]["sr_content"] = "Contenu de la page"
+T["ar"]["sr_content"] = "محتوى الصفحة"
