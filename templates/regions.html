@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.regions_title, t.regions_lead, t.nav_regions) }}
+<section class="section">
+  <div class="wrap">
+    {% if data.regions %}
+    <div class="regions-layout">
+      <div class="map-card" data-reveal>
+        <svg class="civ-map" viewBox="0 0 {{ data.carte.w }} {{ data.carte.h }}" role="img" aria-label="{{ t.regions_title }}">
+          <path class="land" d="{{ data.carte.path }}"/>
+          {% for r in data.regions if r.x %}<circle class="pin" cx="{{ r.x }}" cy="{{ r.y }}" r="5" data-name="{{ r.drena }}"><title>{{ r.drena }}</title></circle>{% endfor %}
+        </svg>
+      </div>
+      <div>
+        <label class="search"><span class="sr">{{ t.regions_search }}</span><input id="region-search" type="search" placeholder="{{ t.regions_search }}" autocomplete="off"></label>
+        <p class="muted" id="region-count" data-template="{{ t.regions_count }}">{{ t.regions_count|replace('{n}', data.regions|length|string) }}</p>
+        <ul class="region-list" id="region-list">
+          {% for r in data.regions %}
+          <li data-q="{{ (r.drena ~ ' ' ~ r.region ~ ' ' ~ r.delegue)|lower }}"><strong>{{ r.drena }}</strong>
+            {% if r.region %}<span class="muted">{{ r.region }}</span>{% endif %}
+            {% if r.delegue %}<span>{{ t.delegate }} : {{ r.delegue }}</span>{% endif %}
+            {% if r.telephone %}<a href="tel:{{ r.telephone|replace(' ', '') }}" dir="ltr">{{ r.telephone }}</a>{% endif %}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% else %}
+    <div class="regions-layout">
+      <div class="map-card" data-reveal><svg class="civ-map" viewBox="0 0 {{ data.carte.w }} {{ data.carte.h }}" role="img" aria-label="{{ t.regions_title }}"><path class="land" d="{{ data.carte.path }}"/></svg></div>
+      <p class="alert">{{ t.regions_empty }}</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
