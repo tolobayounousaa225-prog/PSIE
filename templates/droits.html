@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero with context %}
+{% block content %}
+{{ page_hero(t.rights_title, t.rights_lead, t.nav_rights) }}
+<section class="section">
+  <div class="wrap">
+    <div class="duo">
+      <div>
+        <h2 class="duo-h" data-reveal>{{ t.rights_h }}</h2>
+        <ul class="rules" data-stagger>
+          {% for r in t.rights %}
+          <li class="card rule" data-reveal><div class="ico">{{ icon(r.i) }}</div><h3>{{ r.t }}</h3><p>{{ r.d }}</p></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2 class="duo-h" data-reveal>{{ t.duties_h }}</h2>
+        <ul class="rules" data-stagger>
+          {% for r in t.duties %}
+          <li class="card rule" data-reveal><div class="ico gold">{{ icon(r.i) }}</div><h3>{{ r.t }}</h3><p>{{ r.d }}</p></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <p class="muted rules-note" data-reveal>{{ t.rights_note }}</p>
+    <p class="cta-row" data-reveal><a class="btn outline" href="statuts.html">{{ t.rights_cta }}</a>
+      <a class="btn dark" href="adhesion.html">{{ t.nav_join }}{{ icon('arrow', 'flip') }}</a></p>
+  </div>
+</section>
+{% endblock %}

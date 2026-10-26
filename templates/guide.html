@@ -2,7 +2,7 @@
 {% from "_macros.html" import icon, page_hero, section_head with context %}
 {% block content %}
 {{ page_hero(t.guide_title, t.guide_lead, t.nav_guide) }}
-<section class="section">
+<section class="section" data-toc="h2" data-toc-label="{{ t.toc }}">
   <div class="wrap">
     {% if not app_url %}<p class="alert" data-reveal>{{ t.guide_soon }}</p>{% endif %}
     <ol class="rules" data-stagger>

@@ -533,3 +533,34 @@ def test_guide_shows_login_links_only_when_the_app_is_configured(tmp_path, monke
     monkeypatch.setenv("APP_URL", "https://app.example.org")
     on = (site.build(tmp_path / "b") / "guide.html").read_text(encoding="utf-8")
     assert 'href="https://app.example.org/login"' in on and "ouvrira prochainement" not in on
+
+
+def test_rights_and_duties_page_exists_in_both_languages(dist):
+    fr = (dist / "droits.html").read_text(encoding="utf-8")
+    ar = (dist / "ar" / "droits.html").read_text(encoding="utf-8")
+    assert "Vos droits" in fr and "Vos devoirs" in fr and "حقوقكم" in ar and "واجباتكم" in ar
+    assert "droits.html" in parse(dist / "index.html").links
+
+
+def test_floating_contents_marker_only_on_long_pages(dist):
+    for name in ("statuts", "guide", "faq"):
+        assert "data-toc=" in (dist / f"{name}.html").read_text(encoding="utf-8")
+    assert "data-toc=" not in (dist / "index.html").read_text(encoding="utf-8")
+
+
+def test_home_figures_follow_the_data_files(sandbox):
+    html = (site.build(sandbox / "out") / "index.html").read_text(encoding="utf-8")
+    nb = len(site.load_site_data()["regions"])
+    assert f'data-count="{nb}"' in html
+
+
+def test_link_previews_use_a_page_image_only_with_a_site_url(tmp_path, monkeypatch):
+    monkeypatch.delenv("API_BASE", raising=False)
+    monkeypatch.setenv("SITE_URL", "https://example.org/PSIE")
+    out = site.build(tmp_path / "a")
+    page = (out / "ar" / "droits.html").read_text(encoding="utf-8")
+    assert 'content="https://example.org/PSIE/assets/og/ar-droits.jpg"' in page and "summary_large_image" in page
+    assert (out / "assets" / "og" / "fr-statuts.jpg").stat().st_size > 5000
+    monkeypatch.delenv("SITE_URL")
+    out2 = site.build(tmp_path / "b")
+    assert not (out2 / "assets" / "og").exists() and "og:image" not in (out2 / "index.html").read_text(encoding="utf-8")

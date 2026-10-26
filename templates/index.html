@@ -20,7 +20,7 @@
 
 <section class="stats">
   <div class="wrap"><div class="grid" data-stagger>
-    {% for s in t.stats %}<div class="stat" data-reveal><span class="num" data-count="{{ s.value }}">{{ s.value }}</span><span class="lbl">{{ s.label }}</span></div>{% endfor %}
+    {% for s in stats %}<div class="stat" data-reveal><span class="num" data-count="{{ s.value }}">{{ s.value }}</span><span class="lbl">{{ s.label }}</span></div>{% endfor %}
   </div></div>
 </section>
 

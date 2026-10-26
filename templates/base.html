@@ -13,10 +13,10 @@
   <link rel="canonical" href="{{ canonical }}">
   {% for code, href in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ href }}">{% endfor %}
   <meta property="og:type" content="website"><meta property="og:site_name" content="PSIE">
-  {% if logo and site_url %}<meta property="og:image" content="{{ site_url }}/assets/{{ logo }}">{% endif %}
-  <meta property="og:title" content="{{ site_name }}"><meta property="og:description" content="{{ description }}">
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% if '/og/' in og_image %}<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{{ og_title }}">{% endif %}{% endif %}
+  <meta property="og:title" content="{{ og_title }}"><meta property="og:description" content="{{ description }}">
   <meta property="og:url" content="{{ canonical }}"><meta property="og:locale" content="{{ 'ar_AR' if lang == 'ar' else 'fr_FR' }}">
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="{{ 'summary_large_image' if '/og/' in og_image else 'summary' }}">
   {% endif %}
   {% if logo %}<link rel="icon" href="{{ root }}assets/{{ logo }}">{% else %}<link rel="icon" href="{{ root }}assets/favicon.svg" type="image/svg+xml">{% endif %}
   {% block head %}{% endblock %}
@@ -69,6 +69,7 @@
         <h3>{{ t.footer_discover }}</h3>
         <ul>
           <li><a href="statuts.html">{{ t.nav_rules }}</a></li>
+          <li><a href="droits.html">{{ t.nav_rights }}</a></li>
           <li><a href="equipe.html">{{ t.nav_team }}</a></li>
           <li><a href="partenaires.html">{{ t.nav_partners }}</a></li>
           <li><a href="partenariat.html">{{ t.nav_partnership }}</a></li>

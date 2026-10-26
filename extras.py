@@ -6,6 +6,7 @@ from pathlib import Path
 import qrcode
 import qrcode.image.svg
 from fpdf import FPDF
+from PIL import Image, ImageDraw, ImageFont, features
 
 FONTS = Path(__file__).resolve().parent / "tools" / "fonts"
 GREEN, GOLD, GREY = (10, 58, 39), (183, 138, 44), (86, 101, 93)
@@ -143,3 +144,50 @@ def brochure(t: dict, site_name: str, lang: str, url: str, logo: Path | None) ->
         pdf.set_x(tx)
         pdf.cell(width - 34, 6, f"\u2066{url}\u2069", align=align)
     return bytes(pdf.output())
+
+
+def og_card(title: str, site_name: str, lang: str, logo: Path | None) -> bytes | None:
+    """Image 1200×630 affichée quand on partage une page (WhatsApp, Facebook…). None si l'arabe ne peut pas être mis en forme."""
+    rtl = lang == "ar"
+    if rtl and not features.check("raqm"):
+        return None
+    W, H = 1200, 630
+    img = Image.new("RGB", (W, H), GREEN)
+    d = ImageDraw.Draw(img)
+    for y in range(H):                      # léger dégradé vertical
+        k = y / H
+        d.line([(0, y), (W, y)], fill=tuple(int(c * (1 - 0.35 * k) + 8 * 0.35 * k) for c in GREEN))
+    d.rectangle([0, H - 14, W, H], fill=(201, 162, 75))
+    layout = ImageFont.Layout.RAQM if features.check("raqm") else ImageFont.Layout.BASIC
+    big = ImageFont.truetype(str(FONTS / "DejaVuSans-Bold.ttf"), 64, layout_engine=layout)
+    small = ImageFont.truetype(str(FONTS / "DejaVuSans.ttf"), 30, layout_engine=layout)
+    margin, box = 80, 150
+    x_logo = W - margin - box if rtl else margin
+    if logo and logo.exists():
+        try:
+            lg = Image.open(logo).convert("RGBA")
+            lg.thumbnail((box, box))
+            d.rounded_rectangle([x_logo - 10, 70, x_logo + box + 10, 70 + box + 20], radius=24, fill=(255, 255, 255))
+            img.paste(lg, (x_logo + (box - lg.width) // 2, 80 + (box - lg.height) // 2), lg)
+        except OSError:
+            pass
+    anchor, x = ("ra", W - margin) if rtl else ("la", margin)
+    kw = {"direction": "rtl", "language": "ar"} if rtl else {}
+    max_w = W - 2 * margin
+    lines, cur = [], ""
+    for word in title.split():
+        trial = f"{cur} {word}".strip()
+        if cur and d.textlength(trial, font=big, **kw) > max_w:
+            lines.append(cur)
+            cur = word
+        else:
+            cur = trial
+    lines.append(cur)
+    y = 300
+    for line in lines[:3]:
+        d.text((x, y), line, font=big, fill=(255, 255, 255), anchor=anchor, **kw)
+        y += 82
+    d.text((x, H - 70), site_name, font=small, fill=(231, 207, 142), anchor="ls" if not rtl else "rs", **kw)
+    out = io.BytesIO()
+    img.save(out, "JPEG", quality=82, optimize=True)
+    return out.getvalue()
