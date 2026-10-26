@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site_name }}{% endblock %} — PSIE</title>
+  <meta name="description" content="{{ t.tagline }}">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src {{ api_base or "'none'" }}; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <link rel="stylesheet" href="{{ root }}assets/site.css">
+  <script src="{{ root }}assets/site.js" defer></script>
+</head>
+<body data-api="{{ api_base }}" data-lang="{{ lang }}" data-page="{{ page }}">
+<a class="skip" href="#contenu">{{ t.skip }}</a>
+<header class="topbar">
+  <a class="brand" href="index.html">
+    {% if logo %}<img class="logo" src="{{ root }}assets/{{ logo }}" alt="PSIE" height="36">{% else %}<span class="brand-mark">PSIE</span>{% endif %}
+    <span class="brand-text">{{ site_name }}</span>
+  </a>
+  <nav aria-label="Navigation">
+    <a href="index.html"{% if page == 'index' %} aria-current="page"{% endif %}>{{ t.nav_home }}</a>
+    <a href="apropos.html"{% if page == 'apropos' %} aria-current="page"{% endif %}>{{ t.nav_about }}</a>
+    <a href="membres.html"{% if page == 'membres' %} aria-current="page"{% endif %}>{{ t.nav_members }}</a>
+    <a href="actualites.html"{% if page in ('actualites', 'actualite') %} aria-current="page"{% endif %}>{{ t.nav_news }}</a>
+    {% if app_url %}<a href="{{ app_url }}/adhesion">{{ t.nav_join }}</a>{% endif %}
+  </nav>
+  <div class="tools">
+    <a id="lang-switch" class="lang" href="{{ other_href }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}">{{ other_label }}</a>
+    {% if app_url %}<a class="login" href="{{ app_url }}/login">{{ t.nav_login }}</a>{% endif %}
+  </div>
+</header>
+<main id="contenu">
+{% block content %}{% endblock %}
+</main>
+<footer class="footer"><p>{{ t.footer }}</p></footer>
+</body>
+</html>

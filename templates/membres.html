@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ t.members_title }}{% endblock %}
+{% block content %}
+<h1>{{ t.members_title }}</h1>
+<p class="muted">{{ t.members_help }}</p>
+<div id="membres-list" class="tiles" aria-live="polite"><p class="muted js-loading">{{ t.loading }}</p></div>
+<p id="fallback" class="alert" hidden>{{ t.unavailable }}</p>
+<noscript><p class="alert">{{ t.no_js }}</p></noscript>
+{% endblock %}

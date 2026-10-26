@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ t.nav_home }}{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{{ site_name }}</h1>
+  <p class="lead">{{ t.tagline }}</p>
+  <p>{{ t.intro }}</p>
+  {% if app_url %}<p><a class="btn" href="{{ app_url }}/adhesion">{{ t.join_cta }}</a>
+    <a class="btn ghost" href="{{ app_url }}/adhesion/suivi">{{ t.track }}</a></p>
+  {% else %}<p><span class="btn disabled" aria-disabled="true">{{ t.join_cta }} — {{ t.soon }}</span></p>{% endif %}
+</section>
+<section class="card"><h2>{{ t.missions_title }}</h2>
+  <ul>{% for m in t.missions %}<li>{{ m }}</li>{% endfor %}</ul></section>
+<div class="two">
+  <section class="card"><h2>{{ t.principles_title }}</h2><p>{{ t.principles }}</p></section>
+  <section class="card"><h2>{{ t.organs_title }}</h2><p>{{ t.organs }}</p></section>
+</div>
+<section class="card"><h2>{{ t.contact_title }}</h2><p>{{ t.address }}</p><p>{{ t.phones }}</p></section>
+{% endblock %}
