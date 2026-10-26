@@ -183,3 +183,91 @@ def test_seo_files(tmp_path, monkeypatch):
     assert "Sitemap: https://psie.example.org/sitemap.xml" in (d / "robots.txt").read_text(encoding="utf-8")
     page = (d / "index.html").read_text(encoding="utf-8")
     assert 'rel="canonical"' in page and 'hreflang="ar"' in page and "application/ld+json" in page
+
+
+# ---------- ressources : données modifiables, nouvelles pages ----------
+
+@pytest.fixture
+def sandbox(tmp_path, monkeypatch):
+    """Copie du dépôt dans laquelle on peut écrire des données d'essai sans toucher au vrai dossier data/."""
+    import shutil
+    root = tmp_path / "repo"
+    shutil.copytree(ROOT, root, ignore=shutil.ignore_patterns(".git", "dist", "__pycache__", ".pytest_cache"))
+    monkeypatch.setattr(site, "ROOT", root)
+    monkeypatch.setattr(site, "DATA", root / "data")
+    monkeypatch.setenv("API_BASE", API)
+    monkeypatch.delenv("GOATCOUNTER", raising=False)
+    return root
+
+
+def write_json(root, name, value):
+    import json
+    (root / "data" / f"{name}.json").write_text(json.dumps(value, ensure_ascii=False), encoding="utf-8")
+
+
+def test_new_pages_and_member_sheets_exist(dist):
+    for name in ("documents", "regions", "galerie", "faitiere-lecim", "faitiere-al-hikma"):
+        assert (dist / f"{name}.html").exists() and (dist / "ar" / f"{name}.html").exists()
+    assert "faitiere-lecim.html" in parse(dist / "membres.html").links
+
+
+def test_empty_data_shows_soon_messages_and_hides_optional_blocks(dist):
+    docs = (dist / "documents.html").read_text(encoding="utf-8")
+    assert "bientôt disponibles" in docs
+    home = (dist / "index.html").read_text(encoding="utf-8")
+    assert "Le mot du Président" not in home and 'class="announce"' not in home
+
+
+def test_filled_data_is_rendered(sandbox, tmp_path):
+    (sandbox / "assets" / "docs").mkdir(exist_ok=True)
+    (sandbox / "assets" / "docs" / "statuts.pdf").write_bytes(b"%PDF-1.4")
+    write_json(sandbox, "documents", [{"titre": {"fr": "Statuts", "ar": "النظام"}, "fichier": "assets/docs/statuts.pdf"}])
+    write_json(sandbox, "annonce", {"actif": True, "fr": "AG le 15 décembre", "ar": "الجمعية", "lien": "https://example.org/ag"})
+    write_json(sandbox, "president", {"nom": "A. B.", "message": {"fr": "Bonjour\nTous", "ar": "مرحبا"}})
+    write_json(sandbox, "regions", [{"drena": "Bouaké", "region": "Gbêkê", "lat": 7.69, "lon": -5.03}])
+    d = site.build(tmp_path / "out")
+    assert "assets/docs/statuts.pdf" in parse(d / "documents.html").links
+    home = (d / "index.html").read_text(encoding="utf-8")
+    assert "AG le 15 décembre" in home and 'href="https://example.org/ag"' in home and "Le mot du Président" in home
+    assert "<circle" in (d / "regions.html").read_text(encoding="utf-8")
+
+
+def test_html_in_data_is_escaped(sandbox, tmp_path):
+    write_json(sandbox, "annonce", {"actif": True, "fr": "<script>alert(1)</script>", "ar": "x"})
+    d = site.build(tmp_path / "out")
+    text = (d / "index.html").read_text(encoding="utf-8")
+    assert "<script>alert(1)</script>" not in text and "&lt;script&gt;" in text
+
+
+@pytest.mark.parametrize("name,value", [
+    ("documents", [{"titre": "x", "fichier": "../secret.pdf"}]),
+    ("documents", [{"titre": "x", "fichier": "assets/docs/absent.pdf"}]),
+    ("galerie", [{"image": "http://evil.example/x.jpg"}]),
+    ("annonce", {"actif": True, "fr": "x", "ar": "x", "lien": "javascript:alert(1)"}),
+    ("faitieres", [{"slug": "Mauvais Slug", "sigle": "X"}]),
+    ("faitieres", [{"slug": "a", "sigle": "A", "site_web": "http://pas-https.example"}]),
+    ("regions", {"pas": "une liste"}),
+])
+def test_invalid_data_is_refused_with_a_clear_message(sandbox, tmp_path, name, value):
+    write_json(sandbox, name, value)
+    with pytest.raises(SystemExit) as e:
+        site.build(tmp_path / "out")
+    assert str(e.value)                       # message lisible, pas une trace technique
+
+
+def test_json_syntax_error_names_the_file_and_line(sandbox, tmp_path):
+    (sandbox / "data" / "documents.json").write_text('[\n  {"titre": "x",\n]', encoding="utf-8")
+    with pytest.raises(SystemExit) as e:
+        site.build(tmp_path / "out")
+    assert "documents.json" in str(e.value) and "ligne" in str(e.value)
+
+
+def test_analytics_is_opt_in_and_widens_csp_only_then(sandbox, tmp_path, monkeypatch):
+    plain = (site.build(tmp_path / "a") / "index.html").read_text(encoding="utf-8")
+    assert "goatcounter" not in plain
+    monkeypatch.setenv("GOATCOUNTER", "psie")
+    text = (site.build(tmp_path / "b") / "index.html").read_text(encoding="utf-8")
+    assert 'data-goatcounter="https://psie.goatcounter.com/count"' in text and "https://gc.zgo.at" in htmllib.unescape(text)
+    monkeypatch.setenv("GOATCOUNTER", "x\"><script>")
+    with pytest.raises(SystemExit):
+        site.build(tmp_path / "c")

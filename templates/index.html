@@ -65,11 +65,13 @@
   </div>
 </section>
 
+{% include "_president.html" %}
+
 <section class="section dark-band">
   <div class="wrap">
     {{ section_head(t.nav_members, t.founders_title, t.members_lead) }}
     <div class="badges" data-stagger>
-      {% for f in t.founders %}<div class="badge-tile" data-reveal><div class="seal{% if f|length > 6 %} long{% endif %}">{{ f }}</div><div class="ct">{{ t.cat.fondateur }}</div></div>{% endfor %}
+      {% for fa in data.faitieres %}<a class="badge-tile" href="faitiere-{{ fa.slug }}.html" data-reveal><div class="seal{% if fa.sigle|length > 6 %} long{% endif %}">{{ fa.sigle }}</div><div class="ct">{{ t.cat.fondateur }}</div></a>{% endfor %}
     </div>
   </div>
 </section>

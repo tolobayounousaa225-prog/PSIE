@@ -7,7 +7,7 @@
   <meta name="description" content="{{ description }}">
   <meta name="theme-color" content="#0a3a27">
   {% if noindex %}<meta name="robots" content="noindex">{% endif %}
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src {{ api_base or "'none'" }}; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="{{ csp }}">
   {% if canonical %}
   <link rel="canonical" href="{{ canonical }}">
   {% for code, href in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ href }}">{% endfor %}
@@ -20,6 +20,7 @@
   {% if logo %}<link rel="icon" href="{{ root }}assets/{{ logo }}">{% else %}<link rel="icon" href="{{ root }}assets/favicon.svg" type="image/svg+xml">{% endif %}
   <link rel="stylesheet" href="{{ root }}assets/site.css">
   <script src="{{ root }}assets/site.js" defer></script>
+  {% if counter %}<script data-goatcounter="https://{{ counter }}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>{% endif %}
   {% if page == 'index' and site_url %}
   <script type="application/ld+json">{{ jsonld | safe }}</script>
   {% endif %}
@@ -28,6 +29,13 @@
 {% include "_icons.html" %}
 <a class="skip" href="#contenu">{{ t.skip }}</a>
 <div class="progress" aria-hidden="true"></div>
+{% if data.annonce.actif and data.annonce.texte[lang] %}
+<div class="announce" role="region" aria-label="{{ t.announce }}" hidden>
+  <div class="wrap"><span class="dot" aria-hidden="true"></span>
+    {% if data.annonce.lien %}<a href="{{ data.annonce.lien }}" rel="noopener">{{ data.annonce.texte[lang] }}</a>{% else %}<span>{{ data.annonce.texte[lang] }}</span>{% endif %}
+    <button class="announce-close" type="button" aria-label="{{ t.close }}">×</button></div>
+</div>
+{% endif %}
 <header class="topbar">
   <div class="wrap">
     <a class="brand" href="index.html" aria-label="PSIE">
@@ -57,6 +65,9 @@
       <div>
         <h3>{{ t.footer_links }}</h3>
         <ul>
+          <li><a href="documents.html">{{ t.nav_docs }}</a></li>
+          <li><a href="regions.html">{{ t.nav_regions }}</a></li>
+          <li><a href="galerie.html">{{ t.nav_gallery }}</a></li>
           <li><a href="verification.html">{{ t.nav_verify }}</a></li>
           <li><a href="faq.html">{{ t.nav_faq }}</a></li>
           <li><a href="mentions.html">{{ t.nav_legal }}</a></li>

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.docs_title, t.docs_lead, t.nav_docs) }}
+<section class="section">
+  <div class="wrap">
+    {% if data.documents %}
+    <div class="grid cols-2" data-stagger>
+      {% for d in data.documents %}{% if d.fichier %}
+      <article class="card doc" data-reveal>
+        <div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon('file') }}</div>
+        <div>
+          {% if d.categorie %}<span class="eyebrow">{{ d.categorie }}</span>{% endif %}
+          <h3>{{ d.titre[lang] or d.titre.fr }}</h3>
+          {% if d.description[lang] %}<p>{{ d.description[lang] }}</p>{% endif %}
+          <a class="btn dark" href="{{ root }}{{ d.fichier }}" download>{{ t.download }}{{ icon('arrow', 'flip') }}</a>
+        </div>
+      </article>
+      {% endif %}{% endfor %}
+    </div>
+    {% else %}<p class="alert">{{ t.docs_empty }}</p>{% endif %}
+  </div>
+</section>
+{% endblock %}

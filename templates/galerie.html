@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block content %}
+{{ page_hero(t.gallery_title, t.gallery_lead, t.nav_gallery) }}
+<section class="section">
+  <div class="wrap">
+    {% if data.galerie %}
+    <ul class="gallery" data-stagger>
+      {% for g in data.galerie %}{% if g.image %}
+      <li data-reveal><button type="button" class="shot" data-full="{{ root }}{{ g.image }}" data-caption="{{ g.legende[lang] }}">
+        <img src="{{ root }}{{ g.image }}" alt="{{ g.legende[lang] }}" loading="lazy" decoding="async">
+        {% if g.legende[lang] %}<span class="cap">{{ g.legende[lang] }}</span>{% endif %}
+      </button></li>
+      {% endif %}{% endfor %}
+    </ul>
+    {% else %}<p class="alert">{{ t.gallery_empty }}</p>{% endif %}
+  </div>
+</section>
+<div class="lightbox" hidden role="dialog" aria-modal="true" aria-label="{{ t.nav_gallery }}">
+  <button type="button" class="lb-close" aria-label="{{ t.close }}">×</button>
+  <figure><img alt=""><figcaption></figcaption></figure>
+</div>
+{% endblock %}

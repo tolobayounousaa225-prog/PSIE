@@ -16,6 +16,9 @@ PAGES = [
     ("verification", "nav_verify", True),
     ("actualites", "nav_news", True),
     ("faq", "nav_faq", True),
+    ("documents", "nav_docs", True),
+    ("regions", "nav_regions", True),
+    ("galerie", "nav_gallery", True),
     ("contact", "nav_contact", True),
     ("mentions", "nav_legal", True),
     ("actualite", "nav_news", False),  # détail d'une actualité : contenu chargé par JavaScript
@@ -443,3 +446,44 @@ T = {
         ],
     },
 }
+
+
+# ---- ressources : documents, régions, galerie, fiches des faîtières, mot du Président ----
+T["fr"].update({
+    "announce": "Annonce", "close": "Fermer",
+    "nav_docs": "Documents", "nav_regions": "Représentations régionales", "nav_gallery": "Galerie",
+    "desc_documents": "Statuts, règlement intérieur et documents officiels de la PSIE à télécharger.",
+    "docs_title": "Documents officiels", "docs_lead": "Les textes et formulaires de la PSIE, à télécharger.",
+    "docs_empty": "Les documents seront bientôt disponibles.", "download": "Télécharger",
+    "desc_regions": "Les représentations régionales de la PSIE auprès des Directions Régionales de l'Éducation Nationale (DRENA).",
+    "regions_title": "Représentations régionales",
+    "regions_lead": "La PSIE est représentée auprès des Directions Régionales de l'Éducation Nationale par un délégué régional.",
+    "regions_empty": "La liste des représentations régionales sera bientôt publiée.",
+    "regions_search": "Rechercher une DRENA, une région ou un délégué", "regions_count": "{n} représentations régionales", "delegate": "Délégué",
+    "desc_galerie": "Photos des activités et des événements de la PSIE.",
+    "gallery_title": "Galerie", "gallery_lead": "Les moments forts de la vie de la fédération.",
+    "gallery_empty": "Les photos seront bientôt disponibles.",
+    "president_title": "Le mot du Président",
+    "fa_about": "Présentation", "fa_facts": "En bref", "fa_status": "Statut", "fa_founded": "Création", "fa_schools": "Structures d'éducation",
+    "fa_address": "Adresse", "fa_phone": "Téléphone", "fa_email": "E-mail", "fa_website": "Site web", "fa_back": "Tous nos membres",
+    "fa_empty": "La présentation de cette organisation sera bientôt publiée.",
+})
+T["ar"].update({
+    "announce": "إعلان", "close": "إغلاق",
+    "nav_docs": "الوثائق", "nav_regions": "التمثيليات الجهوية", "nav_gallery": "معرض الصور",
+    "desc_documents": "النظام الأساسي والنظام الداخلي والوثائق الرسمية للمنصة للتحميل.",
+    "docs_title": "الوثائق الرسمية", "docs_lead": "نصوص ونماذج المنصة للتحميل.",
+    "docs_empty": "ستتوفر الوثائق قريبا.", "download": "تحميل",
+    "desc_regions": "التمثيليات الجهوية للمنصة لدى المديريات الجهوية للتربية الوطنية.",
+    "regions_title": "التمثيليات الجهوية",
+    "regions_lead": "تتمثل المنصة لدى المديريات الجهوية للتربية الوطنية بمندوب جهوي.",
+    "regions_empty": "ستنشر قائمة التمثيليات الجهوية قريبا.",
+    "regions_search": "ابحث عن مديرية أو جهة أو مندوب", "regions_count": "{n} تمثيلية جهوية", "delegate": "المندوب",
+    "desc_galerie": "صور أنشطة وفعاليات المنصة.",
+    "gallery_title": "معرض الصور", "gallery_lead": "أبرز لحظات حياة الاتحاد.",
+    "gallery_empty": "ستتوفر الصور قريبا.",
+    "president_title": "كلمة الرئيس",
+    "fa_about": "تقديم", "fa_facts": "نبذة", "fa_status": "الصفة", "fa_founded": "سنة التأسيس", "fa_schools": "الهياكل التعليمية",
+    "fa_address": "العنوان", "fa_phone": "الهاتف", "fa_email": "البريد الإلكتروني", "fa_website": "الموقع الإلكتروني", "fa_back": "جميع الأعضاء",
+    "fa_empty": "سيتم نشر تقديم هذه المنظمة قريبا.",
+})

@@ -1,0 +1,15 @@
+{% set pr = data.president %}
+{% if pr.message[lang] %}
+<section class="section">
+  <div class="wrap">
+    <article class="president" data-reveal>
+      {% if pr.photo %}<img class="portrait" src="{{ root }}{{ pr.photo }}" alt="{{ pr.nom }}" width="220" height="220" loading="lazy">{% endif %}
+      <div>
+        <span class="eyebrow">{{ t.president_title }}</span>
+        <blockquote>{% for para in pr.message[lang].split('\n') if para.strip() %}<p>{{ para }}</p>{% endfor %}</blockquote>
+        <p class="signature"><strong>{{ pr.nom }}</strong>{% if pr.fonction[lang] %}<span>{{ pr.fonction[lang] }}</span>{% endif %}</p>
+      </div>
+    </article>
+  </div>
+</section>
+{% endif %}
