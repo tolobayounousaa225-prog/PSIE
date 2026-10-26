@@ -188,7 +188,7 @@
     var item = data.actualites.filter(function (n) { return n.id === id; })[0];
     if (!item) { fail(); box.remove(); return; }
     clear(box);
-    box.appendChild(el("h1", "", pick(item.titre)));
+    box.appendChild(el("h2", "", pick(item.titre)));
     box.appendChild(el("p", "muted", item.date));
     box.appendChild(el("div", "prose", pick(item.contenu)));
   }

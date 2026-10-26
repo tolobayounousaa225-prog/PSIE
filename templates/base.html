@@ -12,11 +12,12 @@
   <link rel="canonical" href="{{ canonical }}">
   {% for code, href in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ href }}">{% endfor %}
   <meta property="og:type" content="website"><meta property="og:site_name" content="PSIE">
+  {% if logo and site_url %}<meta property="og:image" content="{{ site_url }}/assets/{{ logo }}">{% endif %}
   <meta property="og:title" content="{{ site_name }}"><meta property="og:description" content="{{ description }}">
   <meta property="og:url" content="{{ canonical }}"><meta property="og:locale" content="{{ 'ar_AR' if lang == 'ar' else 'fr_FR' }}">
   <meta name="twitter:card" content="summary">
   {% endif %}
-  <link rel="icon" href="{{ root }}assets/favicon.svg" type="image/svg+xml">
+  {% if logo %}<link rel="icon" href="{{ root }}assets/{{ logo }}">{% else %}<link rel="icon" href="{{ root }}assets/favicon.svg" type="image/svg+xml">{% endif %}
   <link rel="stylesheet" href="{{ root }}assets/site.css">
   <script src="{{ root }}assets/site.js" defer></script>
   {% if page == 'index' and site_url %}
@@ -30,7 +31,7 @@
 <header class="topbar">
   <div class="wrap">
     <a class="brand" href="index.html" aria-label="PSIE">
-      {% if logo %}<img class="logo" src="{{ root }}assets/{{ logo }}" alt="PSIE" height="38">{% else %}<span class="brand-mark">PSIE</span>{% endif %}
+      {% if logo %}<img class="logo" src="{{ root }}assets/{{ logo }}" alt="PSIE" width="46" height="46">{% else %}<span class="brand-mark">PSIE</span>{% endif %}
       <span class="brand-text">{{ site_name }}</span>
     </a>
     <nav class="nav" id="nav" aria-label="{{ t.menu }}">
@@ -50,7 +51,7 @@
   <div class="wrap">
     <div class="cols">
       <div>
-        <a class="brand" href="index.html" aria-label="PSIE">{% if logo %}<img class="logo" src="{{ root }}assets/{{ logo }}" alt="PSIE" height="38">{% else %}<span class="brand-mark">PSIE</span>{% endif %}<span class="brand-text">{{ site_name }}</span></a>
+        <a class="brand" href="index.html" aria-label="PSIE">{% if logo %}<img class="logo" src="{{ root }}assets/{{ logo }}" alt="PSIE" width="46" height="46">{% else %}<span class="brand-mark">PSIE</span>{% endif %}<span class="brand-text">{{ site_name }}</span></a>
         <p>{{ t.footer_tag }}</p>
       </div>
       <div>
