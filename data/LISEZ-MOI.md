@@ -10,6 +10,7 @@ Gardez les guillemets, les virgules et les accolades tels quels ; GitHub signale
 | `annonce.json` | Bandeau en haut du site. Mettre `"actif": true` et écrire le texte `fr` / `ar` (`lien` facultatif, commençant par `https://`). |
 | `president.json` | Mot du Président : `nom`, `photo` (ex. `assets/president.jpg`), `message` en `fr` et `ar`. |
 | `documents.json` | Documents à télécharger : `titre`, `description` (`fr`/`ar`), `fichier` (ex. `assets/docs/statuts.pdf`). Déposez le PDF dans `assets/docs/`. |
+| `actualites.json` | Actualités : `slug` (lettres minuscules, chiffres, tirets), `date` (AAAA-MM-JJ), `titre`, `resume` (une phrase), `contenu` (`fr`/`ar`, un retour à la ligne = un nouveau paragraphe), `image` facultative. Les plus récentes passent en premier. |
 | `galerie.json` | Photos : `image` (ex. `assets/galerie/ag-2026.jpg`), `legende` (`fr`/`ar`), `date`. Déposez les images dans `assets/galerie/`. |
 | `regions.json` | Les 41 DRENA : `region`, `drena`, `delegue`, `telephone`, et `lat` / `lon` (pour la carte). |
 | `faitieres.json` | Fiche de chaque faîtière : `nom`, `presentation` (`fr`/`ar`), `logo`, `annee_creation`, `nombre_ecoles`, `telephone`, `email`, `adresse`, `site_web`. |

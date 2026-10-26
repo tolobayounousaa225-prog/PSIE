@@ -288,3 +288,45 @@ def test_interactive_map_markup(dist):
     assert actions == ["in", "out", "reset"]
     pins = [d for t, d in page.tags if t == "circle" and "pin" in (d.get("class") or "")]
     assert len(pins) == 41 and all(p.get("role") == "button" and p.get("tabindex") == "0" and p.get("aria-label") for p in pins)
+
+
+# ---------- actualités publiées dans le site ----------
+
+def test_news_without_data_or_server_shows_a_message_not_a_loading_placeholder(tmp_path, monkeypatch):
+    monkeypatch.delenv("API_BASE", raising=False)
+    monkeypatch.delenv("APP_URL", raising=False)
+    d = site.build(tmp_path / "d")
+    news = (d / "actualites.html").read_text(encoding="utf-8")
+    assert "skeleton" not in news and "Aucune actualité pour le moment" in news
+    assert 'id="home-news-section"' not in (d / "index.html").read_text(encoding="utf-8")
+
+
+def test_news_with_server_but_no_published_items_keeps_loading_placeholders(dist):
+    assert "skeleton" in (dist / "actualites.html").read_text(encoding="utf-8")
+
+
+def test_published_news_pages_and_cards(sandbox, tmp_path):
+    write_json(sandbox, "actualites", [
+        {"slug": "ag-2026", "date": "2026-12-15", "titre": {"fr": "AG <b>2026</b>", "ar": "الجمعية"},
+         "resume": {"fr": "Rendez-vous à Bouaké.", "ar": "موعد ببواكي."}, "contenu": {"fr": "Premier paragraphe.\nSecond.", "ar": "نص"}},
+        {"slug": "ouverture", "date": "2026-10-20", "titre": {"fr": "Ouverture", "ar": "فتح"}, "resume": {"fr": "x", "ar": "x"}, "contenu": {"fr": "y", "ar": "y"}},
+    ])
+    d = site.build(tmp_path / "out")
+    assert (d / "actualite-ag-2026.html").exists() and (d / "ar" / "actualite-ag-2026.html").exists()
+    listing = (d / "actualites.html").read_text(encoding="utf-8")
+    assert listing.index("AG &lt;b&gt;2026") < listing.index("Ouverture")        # la plus récente d'abord, texte échappé
+    assert "15 décembre 2026" in listing and "skeleton" not in listing
+    assert "<b>2026</b>" not in listing
+    assert "Second." in (d / "actualite-ag-2026.html").read_text(encoding="utf-8")
+    assert "actualite-ag-2026.html" in (d / "sitemap.xml").read_text(encoding="utf-8") if (d / "sitemap.xml").exists() else True
+    assert 'id="home-news-section"' in (d / "index.html").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("item", [
+    {"slug": "Mauvais Slug", "date": "2026-12-15"}, {"slug": "ok", "date": "15/12/2026"}, {"slug": "ok", "date": "2026-13-40"},
+])
+def test_invalid_news_is_refused(sandbox, tmp_path, item):
+    write_json(sandbox, "actualites", [item])
+    with pytest.raises(SystemExit) as e:
+        site.build(tmp_path / "out")
+    assert "actualites.json" in str(e.value)

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero, section_head with context %}
+{% block title %}{{ ne.titre[lang] or ne.titre.fr }}{% endblock %}
+{% block content %}
+{{ page_hero(t.nav_news, '', t.nav_news) }}
+<section class="section">
+  <div class="wrap">
+    <article class="card article" data-reveal>
+      <time datetime="{{ ne.date }}" class="muted">{{ ne.date_long[lang] }}</time>
+      <h2>{{ ne.titre[lang] or ne.titre.fr }}</h2>
+      {% if ne.image %}<img class="article-img" src="{{ root }}{{ ne.image }}" alt="" loading="lazy">{% endif %}
+      <div class="prose">{% for para in (ne.contenu[lang] or ne.contenu.fr).split('\n') if para.strip() %}<p>{{ para }}</p>{% endfor %}</div>
+    </article>
+    <p><a href="actualites.html">{{ t.back }}</a></p>
+  </div>
+</section>
+{% endblock %}
