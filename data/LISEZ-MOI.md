@@ -1,5 +1,7 @@
 # Données du site (modifiables sans programmer)
 
+> Si la variable `CONTENT_URL` est définie (contenu géré depuis l'application), ces fichiers sont remplacés à chaque construction du site : modifiez alors le contenu dans l'administration de l'application, pas ici.
+
 Chaque fichier `.json` de ce dossier alimente une partie du site. Modifiez-le directement sur GitHub
 (bouton crayon), enregistrez : le site se met à jour tout seul en 1 à 2 minutes.
 Un champ vide = la section correspondante reste cachée (ou affiche « bientôt »).

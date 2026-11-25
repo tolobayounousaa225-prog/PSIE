@@ -84,6 +84,23 @@ et fiches des faîtières se modifient dans les fichiers `.json` du dossier [`da
 enregistrer, le site se met à jour en 1 à 2 minutes. Une erreur d'écriture est signalée par le contrôle automatique
 avec le nom du fichier et la ligne, et ne casse pas le site en ligne.
 
+## Contenu géré depuis l'application (administration)
+
+Quand l'application PSIE est en ligne, l'équipe Information et Communication modifie le site depuis son espace
+(« Contenu du site ») et n'a plus besoin de GitHub.
+
+1. Dans GitHub : Settings > Secrets and variables > Actions > **Variables** : ajouter `CONTENT_URL` =
+   `https://adresse-de-l-application/api/public/site.json`.
+2. À chaque modification, l'application demande à GitHub de reconstruire le site (événement `contenu-modifie`) ;
+   le workflow lance `tools/fetch_content.py`, qui remplace `data/*.json` et `assets/media/` par le contenu de l'application.
+3. **Tout ou rien** : si l'application est injoignable ou si une réponse est incorrecte, la construction s'arrête
+   et le site déjà en ligne reste intact. Rien n'est jamais publié à moitié.
+4. Sans `CONTENT_URL`, le site continue de lire le dossier `data/` comme avant.
+
+À savoir : tant que `CONTENT_URL` est défini, les fichiers de `data/` ne sont plus la source du contenu
+(ils sont remplacés à chaque construction). Pour reprendre le contenu actuel dans l'application, voir
+`psie/deploy/CONTENU_SITE.md` du dépôt de l'application.
+
 ## Statistiques de visite (facultatif, sans cookies)
 
 1. Créer un compte gratuit sur [goatcounter.com](https://www.goatcounter.com) : le « code » choisi donne l'adresse `https://CODE.goatcounter.com`.
