@@ -160,7 +160,8 @@ p { margin: 0 0 1em; }
 /* statistiques qui chevauchent le bandeau */
 .stats { margin-top: -86px; position: relative; z-index: 5; }
 .stats .grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
-@media (max-width: 800px) { .stats .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 800px) { .stats .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stat { min-width: 0; overflow-wrap: anywhere; }
 .stat { padding: 26px 22px; border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(12px); border: 1px solid var(--line); box-shadow: var(--shadow-md); text-align: center; transition: transform .35s var(--ease), box-shadow .35s; }
 .stat:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
 .stat .num { display: block; font: 800 clamp(2.2rem, 4vw, 3rem)/1 var(--font-display); background: linear-gradient(135deg, var(--emerald-700), var(--emerald-500)); -webkit-background-clip: text; background-clip: text; color: transparent; font-variant-numeric: tabular-nums; }
@@ -525,3 +526,20 @@ a.tile, a.badge-tile { color: inherit; text-decoration: none; display: block; }
 @media (prefers-color-scheme: dark) { .toc-list a:hover, .toc-list a[aria-current] { color: var(--emerald-300); } }
 @media print { .toc { display: none; } }
 @media (prefers-reduced-motion: reduce) { .toc { transition: none; } }
+
+/* Page de connexion */
+.login-box { margin-top: 28px; text-align: center; display: grid; gap: 12px; justify-items: center; }
+.login-box .icon { width: 1em; height: 1em; vertical-align: -.12em; }
+.login .icon { width: 1.05em; height: 1.05em; margin-inline-end: 6px; vertical-align: -.15em; }
+.ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ticks li { display: flex; gap: 10px; align-items: flex-start; }
+.ticks .icon { flex: none; margin-top: .3em; color: var(--emerald-500); }
+.login { white-space: nowrap; }
+@media (max-width: 480px) { .login .icon { display: none; } .login { padding: 8px 12px; font-size: .85rem; } .lang { padding-inline: 10px; } }
+@media (max-width: 380px) {
+  .topbar .wrap { gap: 8px; }
+  .tools { gap: 4px; margin-inline-start: auto; }
+  .lang { font-size: .78rem; padding-inline: 8px; } .lang .icon { display: none; }
+  .login { font-size: .78rem; padding: 7px 10px; }
+  .brand .logo { width: 40px; height: 40px; flex: none; }
+}

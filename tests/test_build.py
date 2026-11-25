@@ -564,3 +564,29 @@ def test_link_previews_use_a_page_image_only_with_a_site_url(tmp_path, monkeypat
     monkeypatch.delenv("SITE_URL")
     out2 = site.build(tmp_path / "b")
     assert not (out2 / "assets" / "og").exists() and "og:image" not in (out2 / "index.html").read_text(encoding="utf-8")
+
+
+def test_login_button_is_on_every_page_and_follows_the_app_configuration(tmp_path, monkeypatch):
+    monkeypatch.delenv("API_BASE", raising=False)
+    monkeypatch.delenv("APP_URL", raising=False)
+    off = site.build(tmp_path / "off")
+    for f in html_files(off):
+        text = f.read_text(encoding="utf-8")
+        assert 'class="login"' in text, f                                   # présent partout, 404 comprise
+        if f.name != "404.html":
+            assert 'class="login" href="connexion.html"' in text or 'class="login" href="../connexion.html"' in text or f.parent.name == "ar", f
+    page = (off / "connexion.html").read_text(encoding="utf-8")
+    assert "ouvrira prochainement" in page and "/login" not in page
+    monkeypatch.setenv("APP_URL", "https://app.example.org")
+    on = site.build(tmp_path / "on")
+    assert 'class="login" href="https://app.example.org/login"' in (on / "index.html").read_text(encoding="utf-8")
+    assert 'href="https://app.example.org/login">Ouvrir' in (on / "connexion.html").read_text(encoding="utf-8")
+    ar = (on / "ar" / "connexion.html").read_text(encoding="utf-8")
+    assert "تسجيل الدخول" in ar and "الامتحانات" in ar and "المالية" in ar
+
+
+def test_login_page_lists_the_secretariats_and_the_federation_space(dist):
+    fr = (dist / "connexion.html").read_text(encoding="utf-8")
+    for word in ("Espace d'une faîtière".replace("'", "&#39;"), "délégués régionaux", "Ses écoles", "Administration", "Finances",
+                 "Information et Communication", "Formation", "Examens", "Mobilisation des ressources"):
+        assert word in fr, word
