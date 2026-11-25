@@ -50,7 +50,7 @@
     </nav>
     <div class="tools">
       <a id="lang-switch" class="lang" href="{{ other_href }}" hreflang="{{ other_lang }}" lang="{{ other_lang }}"><svg class="icon"><use href="#i-globe"/></svg>{{ other_label }}</a>
-      {% if app_url %}<a class="login" href="{{ app_url }}/login">{{ t.nav_login }}</a>{% endif %}
+      <a class="login" href="{{ app_url ~ '/login' if app_url else 'connexion.html' }}">{{ icon('users') }}{{ t.nav_login }}</a>
       <button class="menu-toggle" type="button" aria-controls="nav" aria-expanded="false" aria-label="{{ t.menu }}"><svg class="icon"><use href="#i-menu"/></svg></button>
     </div>
   </div>
@@ -83,6 +83,7 @@
         <h3>{{ t.footer_help }}</h3>
         <ul>
           <li><a href="faq.html">{{ t.nav_faq }}</a></li>
+          <li><a href="connexion.html">{{ t.nav_login }}</a></li>
           <li><a href="guide.html">{{ t.nav_guide }}</a></li>
           <li><a href="glossaire.html">{{ t.nav_glossary }}</a></li>
           <li><a href="affiche.html">{{ t.nav_poster }}</a></li>

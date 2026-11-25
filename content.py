@@ -19,6 +19,7 @@ PAGES = [
     ("transparence", "nav_transparency", True),
     ("partenariat", "nav_partnership", True),
     ("guide", "nav_guide", True),
+    ("connexion", "nav_login", True),
     ("statuts", "nav_rules", True),
     ("droits", "nav_rights", True),
     ("affiche", "nav_poster", True),
@@ -39,7 +40,7 @@ T = {
         # ---- commun ----
         "nav_home": "Accueil", "nav_about": "À propos", "nav_gov": "Gouvernance", "nav_members": "Nos membres",
         "nav_join": "Adhérer", "nav_verify": "Vérifier un document", "nav_news": "Actualités", "nav_faq": "FAQ",
-        "nav_contact": "Contact", "nav_legal": "Mentions légales", "nav_login": "Connexion", "menu": "Menu",
+        "nav_contact": "Contact", "nav_legal": "Mentions légales", "nav_login": "Se connecter", "menu": "Menu",
         "skip": "Aller au contenu", "lang_other": "العربية", "to_top": "Haut de page", "toc": "Sommaire",
         "footer": "© PSIE — Plateforme des Structures Islamiques d'Éducation",
         "footer_tag": "Coordonner, représenter, élever la qualité de l'éducation islamique en Côte d'Ivoire.",
@@ -251,7 +252,7 @@ T = {
         # ---- commun ----
         "nav_home": "الرئيسية", "nav_about": "من نحن", "nav_gov": "الحوكمة", "nav_members": "أعضاؤنا",
         "nav_join": "الانخراط", "nav_verify": "التحقق من وثيقة", "nav_news": "الأخبار", "nav_faq": "أسئلة شائعة",
-        "nav_contact": "اتصل بنا", "nav_legal": "إشعارات قانونية", "nav_login": "الدخول", "menu": "القائمة",
+        "nav_contact": "اتصل بنا", "nav_legal": "إشعارات قانونية", "nav_login": "تسجيل الدخول", "menu": "القائمة",
         "skip": "انتقل إلى المحتوى", "lang_other": "Français", "to_top": "أعلى الصفحة", "toc": "الفهرس",
         "footer": "© المنصة — منصة الهياكل الإسلامية للتعليم",
         "footer_tag": "التنسيق والتمثيل والارتقاء بجودة التعليم الإسلامي في كوت ديفوار.",
@@ -829,6 +830,15 @@ T["fr"].update({
     "partner_trust": "Vos contributions sont tracées : registre des dons, double signature des retraits et états financiers communiqués aux membres avant l'assemblée.",
     "partner_cta_call": "Appeler le secrétariat", "partner_cta_see": "Voir nos partenaires", "partner_cta_transp": "Consulter le centre de transparence",
     "desc_guide": "Pas à pas : se connecter, suivre ses cotisations, télécharger reçus et attestations, consulter les assemblées, vérifier un document.",
+    "desc_connexion": "Accéder à son espace PSIE : espace de chaque faîtière et espaces des secrétariats.",
+    "login_title": "Se connecter à votre espace", "login_lead": "Chaque faîtière et chaque secrétariat de la PSIE dispose de son propre espace sécurisé.",
+    "login_cards": [
+        {"i": "users", "t": "Espace d'une faîtière", "p": ["Sa fiche et ses informations", "Ses cotisations, reçus et attestations", "Ses délégués régionaux", "Ses écoles"]},
+        {"i": "shield", "t": "Espaces des secrétariats", "p": ["Administration", "Finances", "Information et Communication", "Formation", "Examens", "Mobilisation des ressources"]},
+    ],
+    "login_btn": "Ouvrir la page de connexion", "login_soon": "L'espace en ligne ouvrira prochainement. Le bouton « Se connecter » y mènera dès son ouverture.",
+    "login_help": "Vous n'avez pas encore de compte ? Votre accès est créé par l'administrateur de la PSIE. Besoin d'aide ?", "login_help_link": "Lire le guide de l'espace membre",
+    "login_secure": "Connexion protégée : les comptes sensibles utilisent une double vérification par e-mail.",
     "guide_title": "Guide de l'espace membre", "guide_lead": "Tout ce que votre organisation peut faire en ligne, pas à pas.",
     "guide_soon": "L'espace en ligne ouvrira prochainement : ce guide vous prépare à son utilisation.", "guide_login": "Se connecter à l'espace membre",
     "guide_steps": [
@@ -881,6 +891,15 @@ T["ar"].update({
     "partner_trust": "مساهماتكم مُتتبَّعة: سجل الهبات والتوقيع المزدوج لعمليات السحب والبيانات المالية المقدمة للأعضاء قبل الجمعية.",
     "partner_cta_call": "اتصلوا بالأمانة", "partner_cta_see": "اطلعوا على شركائنا", "partner_cta_transp": "زوروا مركز الشفافية",
     "desc_guide": "خطوة بخطوة: تسجيل الدخول ومتابعة الاشتراكات وتحميل الوصولات والشهادات والاطلاع على الجمعيات والتحقق من وثيقة.",
+    "desc_connexion": "الدخول إلى فضائكم في المنصة: فضاء كل منظمة وفضاءات الأمانات.",
+    "login_title": "الدخول إلى فضائكم", "login_lead": "لكل منظمة ولكل أمانة في المنصة فضاؤها الآمن الخاص.",
+    "login_cards": [
+        {"i": "users", "t": "فضاء المنظمة", "p": ["بطاقتها ومعلوماتها", "اشتراكاتها وإيصالاتها وشهاداتها", "مندوبوها الجهويون", "مدارسها"]},
+        {"i": "shield", "t": "فضاءات الأمانات", "p": ["الإدارة", "المالية", "الإعلام والاتصال", "التكوين", "الامتحانات", "تعبئة الموارد"]},
+    ],
+    "login_btn": "فتح صفحة الدخول", "login_soon": "سيُفتح الفضاء الإلكتروني قريبا. وسيقود إليه زر «تسجيل الدخول» فور افتتاحه.",
+    "login_help": "ليس لديكم حساب بعد؟ ينشئ مسؤول المنصة حساب الدخول. هل تحتاجون إلى مساعدة؟", "login_help_link": "اقرأوا دليل فضاء الأعضاء",
+    "login_secure": "دخول محمي: تستعمل الحسابات الحساسة تحققا مزدوجا عبر البريد الإلكتروني.",
     "guide_title": "دليل فضاء الأعضاء", "guide_lead": "كل ما يمكن لمنظمتكم فعله عبر الإنترنت، خطوة بخطوة.",
     "guide_soon": "سيفتح الفضاء الإلكتروني قريبا: يهيئكم هذا الدليل لاستعماله.", "guide_login": "الدخول إلى فضاء الأعضاء",
     "guide_steps": [

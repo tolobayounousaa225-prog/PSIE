@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero with context %}
+{% block content %}
+{{ page_hero(t.login_title, t.login_lead, t.nav_login) }}
+<section class="section">
+  <div class="wrap">
+    <div class="grid cols-2" data-stagger>
+      {% for c in t.login_cards %}
+      <article class="card" data-reveal>
+        <div class="ico{% if loop.index is even %} gold{% endif %}">{{ icon(c.i) }}</div>
+        <h2>{{ c.t }}</h2>
+        <ul class="ticks">{% for line in c.p %}<li>{{ icon('check') }}{{ line }}</li>{% endfor %}</ul>
+      </article>
+      {% endfor %}
+    </div>
+    <div class="login-box" data-reveal>
+      {% if app_url %}
+      <a class="btn" href="{{ app_url }}/login">{{ t.login_btn }}{{ icon('arrow', 'flip') }}</a>
+      {% else %}
+      <p class="alert">{{ t.login_soon }}</p>
+      {% endif %}
+      <p class="muted">{{ icon('shield') }} {{ t.login_secure }}</p>
+      <p class="muted">{{ t.login_help }} <a href="guide.html">{{ t.login_help_link }}</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}
