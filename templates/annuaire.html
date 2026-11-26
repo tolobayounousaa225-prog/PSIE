@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero with context %}
+{% block content %}
+{{ page_hero(t.directory_title, t.directory_lead, t.nav_directory) }}
+<section class="section">
+  <div class="wrap">
+    {% if data.annuaire %}
+    <p class="directory-tools"><label class="sr-only" for="annuaire-search">{{ t.directory_search }}</label>
+      <input id="annuaire-search" type="search" placeholder="{{ t.directory_search }}" autocomplete="off" data-count-label="{{ t.dir_count }}">
+      <span id="annuaire-count" class="muted" aria-live="polite">{{ data.annuaire|length }} {{ t.dir_count }}</span></p>
+    <div class="table-wrap"><table id="annuaire-table">
+      <thead><tr><th>{{ t.dir_name }}</th><th>{{ t.dir_level }}</th><th>{{ t.dir_place }}</th><th>{{ t.dir_drena }}</th><th>{{ t.dir_org }}</th></tr></thead>
+      <tbody>{% for e in data.annuaire %}
+        <tr><td>{{ e.nom }}</td><td>{{ t.dir_levels.get(e.niveau, '') }}</td><td>{{ e.localite }}</td><td>{{ e.drena }}</td><td>{{ e.faitiere }}</td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+    {% else %}<p class="alert">{{ t.directory_empty }}</p>{% endif %}
+  </div>
+</section>
+{% endblock %}

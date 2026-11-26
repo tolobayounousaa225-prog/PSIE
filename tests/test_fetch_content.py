@@ -80,7 +80,7 @@ def test_content_and_files_replace_the_local_ones(server, site):
     assert json.loads((site / "data" / "president.json").read_text(encoding="utf-8"))["nom"] == "Dr X"
     assert (site / "assets" / "media" / "7.png").read_bytes() == PNG
     assert not (site / "assets" / "media" / "vieux.png").exists()          # le dossier est celui de l'application
-    assert {p.stem for p in (site / "data").glob("*.json")} == set(fc.SINGLETONS + fc.LISTS)
+    assert {p.stem for p in (site / "data").glob("*.json")} == set(fc.SINGLETONS + fc.LISTS + fc.OPTIONAL_LISTS)
     assert not (site / ".contenu-staging").exists()
 
 
@@ -142,3 +142,17 @@ def test_cli_does_nothing_without_a_url_and_fails_loudly_with_a_bad_one(monkeypa
     assert fc.main() == 0 and "conservé" in capsys.readouterr().out
     monkeypatch.setenv("CONTENT_URL", "http://pas-https.example")
     assert fc.main() == 1 and "construction annulée" in capsys.readouterr().err
+
+
+def test_directory_list_is_optional_validated_and_written(server, site):
+    old = document()                                             # application sans annuaire : liste vide, pas d'échec
+    assert "annuaire" not in old
+    fc.run(publish(server, old), site, allow_insecure=True)
+    assert json.loads((site / "data" / "annuaire.json").read_text()) == []
+    good = document(annuaire=[{"nom": "École A", "niveau": "primaire", "localite": "X", "drena": "Y", "faitiere": "LECIM"}])
+    fc.run(publish(server, good), site, allow_insecure=True)
+    assert json.loads((site / "data" / "annuaire.json").read_text())[0]["nom"] == "École A"
+    for bad in ("pas une liste", [{"nom": 3}], [["x"]], [{"nom": "x" * 300}]):
+        with pytest.raises(fc.FetchError):
+            fc.run(publish(server, document(annuaire=bad)), site, allow_insecure=True)
+    assert json.loads((site / "data" / "annuaire.json").read_text())[0]["nom"] == "École A"      # rien n'a changé après un échec

@@ -555,3 +555,19 @@
   window.addEventListener("scroll", update, { passive: true });
   update();
 })();
+
+// Annuaire des écoles : filtre instantané (texte seulement, jamais de HTML construit à partir des données)
+(function () {
+  "use strict";
+  var input = document.getElementById("annuaire-search"), table = document.getElementById("annuaire-table");
+  if (!input || !table) return;
+  var rows = Array.prototype.slice.call(table.tBodies[0].rows), count = document.getElementById("annuaire-count");
+  var label = input.getAttribute("data-count-label") || "";
+  function norm(s) { return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+  var texts = rows.map(function (r) { return norm(r.textContent); });
+  input.addEventListener("input", function () {
+    var q = norm(input.value).trim(), shown = 0;
+    rows.forEach(function (r, i) { var hit = !q || texts[i].indexOf(q) !== -1; r.hidden = !hit; if (hit) shown++; });
+    if (count) count.textContent = shown + " " + label;
+  });
+})();

@@ -622,3 +622,24 @@ def test_invalid_app_address_in_data_is_refused(sandbox, tmp_path, monkeypatch):
     write_json(sandbox, "app", {"app_url": "http://pas-securise.org/chemin"})
     with pytest.raises(SystemExit):
         site.build(tmp_path / "x")
+
+
+def test_school_directory_page_lists_schools_filters_and_hides_nothing_personal(tmp_path, monkeypatch):
+    data = tmp_path / "data"
+    import shutil, json
+    shutil.copytree(ROOT / "data", data)
+    (data / "annuaire.json").write_text(json.dumps([
+        {"nom": "École Al Amine", "niveau": "primaire", "localite": "Yopougon", "drena": "Abidjan 3", "faitiere": "LECIM"},
+        {"nom": "<b>Piège</b>", "niveau": "inconnu", "localite": "", "drena": "", "faitiere": "IQRA"}]), encoding="utf-8")
+    monkeypatch.setattr(site, "DATA", data)
+    dist = tmp_path / "dist"
+    site.build(dist)
+    for page in ("annuaire.html", "ar/annuaire.html"):
+        html = (dist / page).read_text(encoding="utf-8")
+        assert "Al Amine" in html and "&lt;b&gt;Piège" in html and "<b>Piège" not in html and 'id="annuaire-search"' in html
+    assert "Primaire" in (dist / "annuaire.html").read_text(encoding="utf-8") and "الابتدائي" in (dist / "ar/annuaire.html").read_text(encoding="utf-8")
+    assert "annuaire.html" in (dist / "index.html").read_text(encoding="utf-8")                 # lien dans le pied de page
+
+
+def test_empty_directory_shows_a_clear_message(dist):
+    assert "L'annuaire sera bientôt publié" in htmllib.unescape((dist / "annuaire.html").read_text(encoding="utf-8"))
