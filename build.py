@@ -99,7 +99,8 @@ def load_site_data() -> dict:
     documents, galerie, regions, faitieres, actualites, equipe, partenaires, transparence = (
         read_data(n, []) for n in ("documents", "galerie", "regions", "faitieres", "actualites", "equipe", "partenaires", "transparence"))
     contact = read_data("contact", {})
-    for name, value in (("documents", documents), ("galerie", galerie), ("regions", regions), ("faitieres", faitieres),
+    annuaire = read_data("annuaire", [])
+    for name, value in (("annuaire", annuaire), ("documents", documents), ("galerie", galerie), ("regions", regions), ("faitieres", faitieres),
                         ("actualites", actualites), ("equipe", equipe), ("partenaires", partenaires), ("transparence", transparence)):
         if not isinstance(value, list):
             sys.exit(f"data/{name}.json : une liste [ ... ] est attendue.")
@@ -111,8 +112,12 @@ def load_site_data() -> dict:
                       "photo": asset_path("data/president.json (photo)", president.get("photo")),
                       "message": bi("president.message", president.get("message", ""))},
         "documents": [], "galerie": [], "regions": [], "faitieres": [], "actualites": [], "equipe": [], "partenaires": [], "transparence": [],
-        "contact": {},
+        "contact": {}, "annuaire": [],
     }
+    for i, a in enumerate(annuaire, 1):
+        if not isinstance(a, dict) or not str(a.get("nom", "")).strip():
+            sys.exit(f"data/annuaire.json [{i}] : « nom » obligatoire.")
+        out["annuaire"].append({k: str(a.get(k, "")).strip()[:255] for k in ("nom", "niveau", "localite", "drena", "faitiere")})
     for i, m in enumerate(equipe, 1):
         organe = str(m.get("organe", "")).strip()
         if organe not in ("den", "ca", "cc"):

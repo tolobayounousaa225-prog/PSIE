@@ -21,6 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SINGLETONS = ("annonce", "president", "contact")
+OPTIONAL_LISTS = ("annuaire",)         # absente chez une ancienne application : remplacée par une liste vide
 LISTS = ("actualites", "equipe", "partenaires", "documents", "transparence", "galerie", "faitieres", "regions")
 MEDIA_PATH_RE = re.compile(r"assets/media/\d{1,9}\.(jpg|png|webp|pdf)")
 MEDIA_URL_RE = re.compile(r"/medias/\d{1,9}\.(jpg|png|webp|pdf)")
@@ -75,6 +76,11 @@ def _validate(doc) -> list[dict]:
     for key in LISTS:
         if not isinstance(doc.get(key), list):
             raise FetchError(f"contenu mal formé : « {key} » manquant ou invalide")
+    for key in OPTIONAL_LISTS:
+        rows = doc.setdefault(key, [])
+        if not isinstance(rows, list) or len(rows) > 5000 or not all(
+                isinstance(r, dict) and all(isinstance(v, str) and len(v) <= 255 for v in r.values()) for r in rows):
+            raise FetchError(f"contenu mal formé : « {key} » invalide")
     media = doc.get("media")
     if not isinstance(media, list) or len(media) > MAX_FILES:
         raise FetchError("contenu mal formé : liste des fichiers manquante ou trop longue")
@@ -108,12 +114,12 @@ def run(content_url: str, root: Path = ROOT, allow_insecure: bool = False) -> di
             if hashlib.sha256(blob).hexdigest() != m["sha256"]:
                 raise FetchError(f"fichier altéré ou incomplet : {m['url']}")
             (staging / "media" / Path(m["path"]).name).write_bytes(blob)
-        for key in SINGLETONS + LISTS:
+        for key in SINGLETONS + LISTS + OPTIONAL_LISTS:
             (staging / "data" / f"{key}.json").write_text(
                 json.dumps(doc[key], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         # Tout est prêt et vérifié : on remplace d'un bloc.
         (root / "data").mkdir(exist_ok=True)
-        for key in SINGLETONS + LISTS:
+        for key in SINGLETONS + LISTS + OPTIONAL_LISTS:
             os.replace(staging / "data" / f"{key}.json", root / "data" / f"{key}.json")
         target = root / "assets" / "media"
         shutil.rmtree(target, ignore_errors=True)

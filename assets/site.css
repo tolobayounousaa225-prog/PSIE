@@ -543,3 +543,13 @@ a.tile, a.badge-tile { color: inherit; text-decoration: none; display: block; }
   .login { font-size: .78rem; padding: 7px 10px; }
   .brand .logo { width: 40px; height: 40px; flex: none; }
 }
+
+/* Annuaire des écoles */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.directory-tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 0 0 14px; }
+.directory-tools input { flex: 1; min-width: 220px; max-width: 420px; padding: 10px 14px; border: 1px solid var(--line, #d7ded9); border-radius: 999px; font: inherit; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line, #d7ded9); border-radius: 12px; background: var(--card, #fff); }
+.table-wrap table { width: 100%; border-collapse: collapse; min-width: 560px; }
+.table-wrap th, .table-wrap td { padding: 10px 14px; text-align: start; border-bottom: 1px solid var(--line, #e6ebe8); }
+.table-wrap th { font-size: .85rem; text-transform: uppercase; letter-spacing: .03em; opacity: .75; }
+.table-wrap tr[hidden] { display: none; }
