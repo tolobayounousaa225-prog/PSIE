@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  # Déclenché par l'application quand le contenu du site est modifié (voir CONTENU_SITE.md)
+  repository_dispatch:
+    types: [contenu-modifie]
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -20,6 +27,13 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - name: Tests
         run: python -m pytest -q
+      - name: Récupérer le contenu de l'application
+        # Si CONTENT_URL est défini et que la récupération échoue, la construction s'arrête
+        # et le site déjà en ligne reste inchangé.
+        if: vars.CONTENT_URL != ''
+        env:
+          CONTENT_URL: ${{ vars.CONTENT_URL }}
+        run: python tools/fetch_content.py
       - name: Construire le site
         # Réglages à définir dans Settings > Secrets and variables > Actions > Variables
         env:
