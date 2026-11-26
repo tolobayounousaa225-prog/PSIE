@@ -103,7 +103,19 @@ def test_app_links_when_configured(tmp_path, monkeypatch):
     assert "https://app2.example.org/adhesion/suivi" in links
 
 
-def test_without_app_url_buttons_are_disabled(tmp_path, monkeypatch, capsys):
+@pytest.fixture
+def no_app_json(tmp_path, monkeypatch):
+    """Site sans data/app.json : l'adresse de l'application ne vient alors que de la variable APP_URL."""
+    import shutil
+    copy = tmp_path / "data-sans-app"
+    shutil.copytree(ROOT / "data", copy)
+    (copy / "app.json").unlink()
+    monkeypatch.setattr(site, "DATA", copy)
+    return copy
+
+
+
+def test_without_app_url_buttons_are_disabled(tmp_path, monkeypatch, capsys, no_app_json):
     monkeypatch.delenv("API_BASE", raising=False)
     monkeypatch.delenv("APP_URL", raising=False)
     monkeypatch.delenv("CUSTOM_DOMAIN", raising=False)
@@ -525,7 +537,7 @@ def test_partnership_whatsapp_uses_its_own_message(sandbox, tmp_path):
     assert "wa.me" not in (site.build(tmp_path / "out2") / "partenariat.html").read_text(encoding="utf-8")
 
 
-def test_guide_shows_login_links_only_when_the_app_is_configured(tmp_path, monkeypatch):
+def test_guide_shows_login_links_only_when_the_app_is_configured(tmp_path, monkeypatch, no_app_json):
     monkeypatch.delenv("API_BASE", raising=False)
     monkeypatch.delenv("APP_URL", raising=False)
     off = (site.build(tmp_path / "a") / "guide.html").read_text(encoding="utf-8")
@@ -566,7 +578,7 @@ def test_link_previews_use_a_page_image_only_with_a_site_url(tmp_path, monkeypat
     assert not (out2 / "assets" / "og").exists() and "og:image" not in (out2 / "index.html").read_text(encoding="utf-8")
 
 
-def test_login_button_is_on_every_page_and_follows_the_app_configuration(tmp_path, monkeypatch):
+def test_login_button_is_on_every_page_and_follows_the_app_configuration(tmp_path, monkeypatch, no_app_json):
     monkeypatch.delenv("API_BASE", raising=False)
     monkeypatch.delenv("APP_URL", raising=False)
     off = site.build(tmp_path / "off")
@@ -590,3 +602,23 @@ def test_login_page_lists_the_secretariats_and_the_federation_space(dist):
     for word in ("Espace d'une faîtière".replace("'", "&#39;"), "délégués régionaux", "Ses écoles", "Administration", "Finances",
                  "Information et Communication", "Formation", "Examens", "Mobilisation des ressources"):
         assert word in fr, word
+
+
+def test_login_button_reads_the_app_address_from_the_data_folder(sandbox, tmp_path, monkeypatch):
+    monkeypatch.delenv("APP_URL", raising=False)
+    monkeypatch.delenv("API_BASE", raising=False)
+    write_json(sandbox, "app", {"app_url": "https://app.exemple.org"})
+    out = site.build(tmp_path / "a")
+    for name in ("index.html", "ar/guide.html", "connexion.html"):
+        text = (out / name).read_text(encoding="utf-8")
+        assert 'class="login" href="https://app.exemple.org/login"' in text, name
+    assert "https://app.exemple.org/login" in (out / "index.html").read_text(encoding="utf-8").split('class="footer"')[1]   # pied de page aussi
+    monkeypatch.setenv("APP_URL", "https://autre.exemple.org")                    # la variable GitHub reste prioritaire
+    assert 'class="login" href="https://autre.exemple.org/login"' in (site.build(tmp_path / "b") / "index.html").read_text(encoding="utf-8")
+
+
+def test_invalid_app_address_in_data_is_refused(sandbox, tmp_path, monkeypatch):
+    monkeypatch.delenv("APP_URL", raising=False)
+    write_json(sandbox, "app", {"app_url": "http://pas-securise.org/chemin"})
+    with pytest.raises(SystemExit):
+        site.build(tmp_path / "x")

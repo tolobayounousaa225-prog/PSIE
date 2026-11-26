@@ -9,6 +9,7 @@ Gardez les guillemets, les virgules et les accolades tels quels ; GitHub signale
 
 | Fichier | Rôle |
 |---|---|
+| `app.json` | Adresse de l'application PSIE (`app_url`, en `https://`, sans `/` final). Le bouton « Se connecter » du site mène directement à `app_url/login`. Une variable GitHub `APP_URL`, si elle existe, est prioritaire. À changer le jour où le vrai nom de domaine est en service. |
 | `annonce.json` | Bandeau en haut du site. Mettre `"actif": true` et écrire le texte `fr` / `ar` (`lien` facultatif, commençant par `https://`). |
 | `president.json` | Mot du Président : `nom`, `photo` (ex. `assets/president.jpg`), `message` en `fr` et `ar`. |
 | `documents.json` | Documents à télécharger : `titre`, `description` (`fr`/`ar`), `fichier` (ex. `assets/docs/statuts.pdf`). Déposez le PDF dans `assets/docs/`. |

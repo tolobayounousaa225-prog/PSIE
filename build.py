@@ -212,7 +212,11 @@ def page_url(site_url: str, lang: str, page: str) -> str:
 
 def build(dist: Path | None = None) -> Path:
     api_base = clean_url("API_BASE", os.environ.get("API_BASE", ""))
-    app_url = clean_url("APP_URL", os.environ.get("APP_URL", "")) or api_base
+    # Adresse de l'application (bouton « Se connecter » direct, comme sur le site de la LECIM) :
+    # variable APP_URL si elle existe, sinon data/app.json, sinon API_BASE.
+    app_url = (clean_url("APP_URL", os.environ.get("APP_URL", ""))
+               or clean_url("data/app.json (app_url)", str(read_data("app", {}).get("app_url", "")))
+               or api_base)
     site_url = clean_url("SITE_URL", os.environ.get("SITE_URL", ""), SITE_URL_RE,
                          "https://domaine ou https://domaine/chemin (sans espace)")
     domain = os.environ.get("CUSTOM_DOMAIN", "").strip()
