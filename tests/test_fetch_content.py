@@ -80,7 +80,7 @@ def test_content_and_files_replace_the_local_ones(server, site):
     assert json.loads((site / "data" / "president.json").read_text(encoding="utf-8"))["nom"] == "Dr X"
     assert (site / "assets" / "media" / "7.png").read_bytes() == PNG
     assert not (site / "assets" / "media" / "vieux.png").exists()          # le dossier est celui de l'application
-    assert {p.stem for p in (site / "data").glob("*.json")} == set(fc.SINGLETONS + fc.LISTS + fc.OPTIONAL_LISTS)
+    assert {p.stem for p in (site / "data").glob("*.json")} == set(fc.SINGLETONS + fc.LISTS + fc.OPTIONAL_LISTS + fc.OPTIONAL_DICTS)
     assert not (site / ".contenu-staging").exists()
 
 
@@ -156,3 +156,13 @@ def test_directory_list_is_optional_validated_and_written(server, site):
         with pytest.raises(fc.FetchError):
             fc.run(publish(server, document(annuaire=bad)), site, allow_insecure=True)
     assert json.loads((site / "data" / "annuaire.json").read_text())[0]["nom"] == "École A"      # rien n'a changé après un échec
+
+
+def test_page_texts_are_optional_and_validated(server, site):
+    fc.run(publish(server, document()), site, allow_insecure=True)             # ancienne application : textes d'origine
+    assert json.loads((site / "data" / "textes.json").read_text()) == {}
+    good = {"faq": [{"q": {"fr": "Q", "ar": ""}, "a": {"fr": "R", "ar": ""}}]}
+    fc.run(publish(server, document(textes=good)), site, allow_insecure=True)
+    assert json.loads((site / "data" / "textes.json").read_text()) == good
+    with pytest.raises(fc.FetchError):
+        fc.run(publish(server, document(textes=["pas un objet"])), site, allow_insecure=True)

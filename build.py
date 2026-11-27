@@ -23,7 +23,8 @@ from pathlib import Path
 import extras
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from content import PAGES, SITE_NAME, T
+import textes
+from content import PAGES, SITE_NAME, T as T_BASE
 
 ROOT = Path(__file__).resolve().parent
 URL_RE = re.compile(r"^https?://[A-Za-z0-9.-]+(:\d{1,5})?$")
@@ -234,6 +235,7 @@ def build(dist: Path | None = None) -> Path:
         sys.exit(f"GOATCOUNTER invalide : « {counter} » (attendu : le code de votre compte, ex. psie).")
     dist = dist or Path(os.environ.get("DIST", ROOT / "dist"))
     site_data = load_site_data()
+    T = textes.apply(T_BASE, read_data("textes", {}))     # textes modifiés depuis l'application, sinon ceux d'origine
     pages = (list(PAGES) + [(f"faitiere-{f['slug']}", "nav_members", True) for f in site_data["faitieres"]]
              + [(f"actualite-{n['slug']}", "nav_news", True) for n in site_data["actualites"]])
     def csp_for(page: str, base_href: str = "") -> str:
